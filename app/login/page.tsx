@@ -8,44 +8,28 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-export default function AuthPage() {
-  const [isLogin, setIsLogin] = useState(true);
+export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
 
-    if (isLogin) {
-      // Login
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-      if (error) {
-        setMessage(`Error: ${error.message}`);
-      } else {
-        setMessage("Login successful!");
-        setTimeout(() => router.push("/dashboard"), 1000);
-      }
+    if (error) {
+      setMessage(`Error: ${error.message}`);
     } else {
-      // Signup
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-
-      if (error) {
-        setMessage(`Error: ${error.message}`);
-      } else {
-        setMessage("Success! Check your email to confirm your account.");
-      }
+      setMessage("Login successful!");
+      setTimeout(() => router.push("/dashboard"), 1000);
     }
 
     setLoading(false);
@@ -107,58 +91,12 @@ export default function AuthPage() {
           margin: "0 auto 24px",
           boxShadow: "0 8px 24px rgba(102, 126, 234, 0.4)"
         }}>
-          <span style={{ fontSize: "32px" }}>{isLogin ? "🔐" : "🚀"}</span>
-        </div>
-
-        {/* Toggle Buttons */}
-        <div style={{
-          display: "flex",
-          background: "#f1f5f9",
-          borderRadius: "12px",
-          padding: "4px",
-          marginBottom: "32px"
-        }}>
-          <button
-            onClick={() => setIsLogin(true)}
-            style={{
-              flex: 1,
-              padding: "12px",
-              fontSize: "14px",
-              fontWeight: "600",
-              background: isLogin ? "#fff" : "transparent",
-              color: isLogin ? "#667eea" : "#64748b",
-              border: "none",
-              borderRadius: "10px",
-              cursor: "pointer",
-              transition: "all 0.3s ease",
-              boxShadow: isLogin ? "0 2px 8px rgba(0, 0, 0, 0.1)" : "none"
-            }}
-          >
-            Sign In
-          </button>
-          <button
-            onClick={() => setIsLogin(false)}
-            style={{
-              flex: 1,
-              padding: "12px",
-              fontSize: "14px",
-              fontWeight: "600",
-              background: !isLogin ? "#fff" : "transparent",
-              color: !isLogin ? "#667eea" : "#64748b",
-              border: "none",
-              borderRadius: "10px",
-              cursor: "pointer",
-              transition: "all 0.3s ease",
-              boxShadow: !isLogin ? "0 2px 8px rgba(0, 0, 0, 0.1)" : "none"
-            }}
-          >
-            Sign Up
-          </button>
+          <span style={{ fontSize: "32px" }}>🔐</span>
         </div>
 
         {/* Title */}
         <h1 style={{
-          fontSize: "28px",
+          fontSize: "32px",
           fontWeight: "700",
           textAlign: "center",
           background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
@@ -166,7 +104,7 @@ export default function AuthPage() {
           WebkitTextFillColor: "transparent",
           marginBottom: "8px"
         }}>
-          {isLogin ? "Welcome Back" : "Create Account"}
+          Welcome Back
         </h1>
         <p style={{
           textAlign: "center",
@@ -174,11 +112,11 @@ export default function AuthPage() {
           marginBottom: "32px",
           fontSize: "14px"
         }}>
-          {isLogin ? "Sign in to R&K AI Dashboard" : "Join R&K AI Dashboard"}
+          Sign in to access your dashboard
         </p>
 
         {/* Form */}
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleLogin}>
           <div style={{ marginBottom: "20px" }}>
             <label style={{
               display: "block",
@@ -204,8 +142,7 @@ export default function AuthPage() {
                 outline: "none",
                 transition: "all 0.3s ease",
                 boxSizing: "border-box",
-                background: "#fff",
-                color: "#1e293b"
+                background: "#fff"
               }}
               onFocus={(e) => e.target.style.borderColor = "#667eea"}
               onBlur={(e) => e.target.style.borderColor = "#e2e8f0"}
@@ -237,8 +174,7 @@ export default function AuthPage() {
                 outline: "none",
                 transition: "all 0.3s ease",
                 boxSizing: "border-box",
-                background: "#fff",
-                color: "#1e293b"
+                background: "#fff"
               }}
               onFocus={(e) => e.target.style.borderColor = "#667eea"}
               onBlur={(e) => e.target.style.borderColor = "#e2e8f0"}
@@ -265,7 +201,7 @@ export default function AuthPage() {
             onMouseEnter={(e) => !loading && (e.currentTarget.style.transform = "translateY(-2px)")}
             onMouseLeave={(e) => !loading && (e.currentTarget.style.transform = "translateY(0)")}
           >
-            {loading ? (isLogin ? "Signing In..." : "Creating Account...") : (isLogin ? "Sign In →" : "Sign Up →")}
+            {loading ? "Signing In..." : "Sign In →"}
           </button>
         </form>
 
@@ -285,25 +221,21 @@ export default function AuthPage() {
           </div>
         )}
 
-        {/* Footer Info */}
+        {/* Footer */}
         <p style={{
           textAlign: "center",
           marginTop: "24px",
-          fontSize: "12px",
-          color: "#94a3b8"
+          fontSize: "14px",
+          color: "#64748b"
         }}>
-          {isLogin ? "New to R&K AI Dashboard?" : "Already have an account?"}{" "}
-          <span
-            onClick={() => setIsLogin(!isLogin)}
-            style={{
-              color: "#667eea",
-              fontWeight: "600",
-              cursor: "pointer",
-              textDecoration: "underline"
-            }}
-          >
-            {isLogin ? "Create one now" : "Sign in instead"}
-          </span>
+          Don't have an account?{" "}
+          <a href="/signup" style={{
+            color: "#667eea",
+            fontWeight: "600",
+            textDecoration: "none"
+          }}>
+            Sign Up
+          </a>
         </p>
       </div>
     </div>
