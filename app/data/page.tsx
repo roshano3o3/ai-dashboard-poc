@@ -4,7 +4,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { createClient, type User } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import ExportButton from "../dashboard/ExportButton";
-import AIInsights from "../dashboard/AIInsights";
 import { GaugeChart, HeatmapChart, FunnelChartComponent, RadarChartComponent, TreemapChart } from "../dashboard/AdvancedCharts";
 
 import {
