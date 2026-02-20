@@ -67,7 +67,7 @@ export default function FilterBar({
 
     if ("days" in preset) {
       start = new Date(today);
-      start.setDate(today.getDate() - preset.days);
+      start.setDate(today.getDate() - (preset.days ?? 0))
     } else {
       switch (preset.type) {
         case "this_month":
