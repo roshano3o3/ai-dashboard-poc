@@ -21,7 +21,7 @@ import {
   ResponsiveContainer,
   Cell,
 } from "recharts";
-import { GaugeChart, HeatmapChart, FunnelChartComponent, RadarChartComponent, TreemapChart } from "./AdvancedCharts";
+import { GaugeChart, HeatmapChart, FunnelChartComponent, RadarChartComponent, TreemapChart } from "../dashboard/AdvancedCharts";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
