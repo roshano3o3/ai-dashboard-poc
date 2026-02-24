@@ -1,4 +1,17 @@
 console.log("WELCOME PAGE VERSION: 9999");
+<div style={{
+  position: "fixed",
+  top: 10,
+  right: 10,
+  zIndex: 99999,
+  background: "red",
+  color: "white",
+  padding: "6px 10px",
+  borderRadius: 8,
+  fontWeight: 900
+}}>
+  VERSION 9999
+</div>
 
 "use client";
 
