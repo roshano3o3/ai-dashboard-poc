@@ -1,18 +1,3 @@
-console.log("WELCOME PAGE VERSION: 9999");
-<div style={{
-  position: "fixed",
-  top: 10,
-  right: 10,
-  zIndex: 99999,
-  background: "red",
-  color: "white",
-  padding: "6px 10px",
-  borderRadius: 8,
-  fontWeight: 900
-}}>
-  VERSION 9999
-</div>
-
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -22,9 +7,7 @@ import { useRouter } from "next/navigation";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
 const supabase =
-  supabaseUrl && supabaseAnonKey
-    ? createClient(supabaseUrl, supabaseAnonKey)
-    : null;
+  supabaseUrl && supabaseAnonKey ? createClient(supabaseUrl, supabaseAnonKey) : null;
 
 // ─── DASHBOARD PREVIEW MINI COMPONENTS ───────────────────────
 const MiniBarChart = () => (
@@ -48,15 +31,50 @@ const MiniBarChart = () => (
 
 const MiniDonut = () => (
   <svg width="60" height="60" viewBox="0 0 60 60">
-    <circle cx="30" cy="30" r="22" fill="none" stroke="rgba(99,102,241,0.15)" strokeWidth="10" />
-    <circle cx="30" cy="30" r="22" fill="none" stroke="#6366F1" strokeWidth="10"
-      strokeDasharray="69 69" strokeDashoffset="0" strokeLinecap="round"
-      transform="rotate(-90 30 30)" style={{ animation: "donutFill 1s ease 0.3s both" }} />
-    <circle cx="30" cy="30" r="22" fill="none" stroke="#EC4899" strokeWidth="10"
-      strokeDasharray="35 103" strokeDashoffset="-69" strokeLinecap="round"
-      transform="rotate(-90 30 30)" />
+    <circle
+      cx="30"
+      cy="30"
+      r="22"
+      fill="none"
+      stroke="rgba(99,102,241,0.15)"
+      strokeWidth="10"
+    />
+    <circle
+      cx="30"
+      cy="30"
+      r="22"
+      fill="none"
+      stroke="#6366F1"
+      strokeWidth="10"
+      strokeDasharray="69 69"
+      strokeDashoffset="0"
+      strokeLinecap="round"
+      transform="rotate(-90 30 30)"
+      style={{ animation: "donutFill 1s ease 0.3s both" }}
+    />
+    <circle
+      cx="30"
+      cy="30"
+      r="22"
+      fill="none"
+      stroke="#EC4899"
+      strokeWidth="10"
+      strokeDasharray="35 103"
+      strokeDashoffset="-69"
+      strokeLinecap="round"
+      transform="rotate(-90 30 30)"
+    />
     <circle cx="30" cy="30" r="14" fill="rgba(15,23,42,0.95)" />
-    <text x="30" y="34" textAnchor="middle" fill="#fff" fontSize="9" fontWeight="800">57%</text>
+    <text
+      x="30"
+      y="34"
+      textAnchor="middle"
+      fill="#fff"
+      fontSize="9"
+      fontWeight="800"
+    >
+      57%
+    </text>
   </svg>
 );
 
@@ -68,11 +86,23 @@ const MiniLineChart = () => (
         <stop offset="100%" stopColor="#6366F1" stopOpacity="0" />
       </linearGradient>
     </defs>
-    <path d="M0,40 L20,28 L40,32 L60,15 L80,22 L100,8 L120,12" fill="none"
-      stroke="#6366F1" strokeWidth="2.5" strokeLinecap="round"
-      style={{ strokeDasharray: 300, strokeDashoffset: 300, animation: "drawLine 1.2s ease 0.2s forwards" }} />
-    <path d="M0,40 L20,28 L40,32 L60,15 L80,22 L100,8 L120,12 L120,50 L0,50Z"
-      fill="url(#lineGrad)" opacity="0.6" />
+    <path
+      d="M0,40 L20,28 L40,32 L60,15 L80,22 L100,8 L120,12"
+      fill="none"
+      stroke="#6366F1"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      style={{
+        strokeDasharray: 300,
+        strokeDashoffset: 300,
+        animation: "drawLine 1.2s ease 0.2s forwards",
+      }}
+    />
+    <path
+      d="M0,40 L20,28 L40,32 L60,15 L80,22 L100,8 L120,12 L120,50 L0,50Z"
+      fill="url(#lineGrad)"
+      opacity="0.6"
+    />
   </svg>
 );
 
@@ -94,9 +124,21 @@ const FEATURES = [
     color: "#EC4899",
     glow: "rgba(236,72,153,0.35)",
     preview: (
-      <div style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", lineHeight: 1.5, padding: "4px 0" }}>
-        <div style={{ color: "#EC4899", fontWeight: 800, marginBottom: 4 }}>🤖 AI says:</div>
-        <div>"Sales peaked on Friday with 34% above average. Top performer: Chris Martin."</div>
+      <div
+        style={{
+          fontSize: 11,
+          color: "rgba(255,255,255,0.7)",
+          lineHeight: 1.5,
+          padding: "4px 0",
+        }}
+      >
+        <div style={{ color: "#EC4899", fontWeight: 800, marginBottom: 4 }}>
+          🤖 AI says:
+        </div>
+        <div>
+          "Sales peaked on Friday with 34% above average. Top performer: Chris
+          Martin."
+        </div>
       </div>
     ),
     tag: "Groq AI Powered",
@@ -119,7 +161,20 @@ const FEATURES = [
     preview: (
       <div style={{ display: "flex", gap: 6, justifyContent: "center", paddingTop: 4 }}>
         {["PDF", "XLSX", "CSV"].map((t) => (
-          <div key={t} style={{ padding: "4px 10px", borderRadius: 6, background: "rgba(16,185,129,0.2)", border: "1px solid rgba(16,185,129,0.4)", fontSize: 11, fontWeight: 800, color: "#10B981" }}>{t}</div>
+          <div
+            key={t}
+            style={{
+              padding: "4px 10px",
+              borderRadius: 6,
+              background: "rgba(16,185,129,0.2)",
+              border: "1px solid rgba(16,185,129,0.4)",
+              fontSize: 11,
+              fontWeight: 800,
+              color: "#10B981",
+            }}
+          >
+            {t}
+          </div>
         ))}
       </div>
     ),
@@ -132,9 +187,28 @@ const FEATURES = [
     color: "#F59E0B",
     glow: "rgba(245,158,11,0.35)",
     preview: (
-      <div style={{ display: "flex", alignItems: "center", gap: 8, justifyContent: "center", paddingTop: 4 }}>
-        <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#10B981", boxShadow: "0 0 8px #10B981", animation: "pulse 1.5s infinite" }} />
-        <span style={{ fontSize: 12, color: "rgba(255,255,255,0.8)", fontWeight: 700 }}>Live — Updated 2s ago</span>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          justifyContent: "center",
+          paddingTop: 4,
+        }}
+      >
+        <div
+          style={{
+            width: 8,
+            height: 8,
+            borderRadius: "50%",
+            background: "#10B981",
+            boxShadow: "0 0 8px #10B981",
+            animation: "pulse 1.5s infinite",
+          }}
+        />
+        <span style={{ fontSize: 12, color: "rgba(255,255,255,0.8)", fontWeight: 700 }}>
+          Live — Updated 2s ago
+        </span>
       </div>
     ),
     tag: "30s Auto-Refresh",
@@ -148,7 +222,20 @@ const FEATURES = [
     preview: (
       <div style={{ display: "flex", gap: 5, justifyContent: "center", flexWrap: "wrap", paddingTop: 4 }}>
         {["Sales", "HR", "Finance", "Marketing"].map((t) => (
-          <div key={t} style={{ padding: "3px 9px", borderRadius: 6, background: "rgba(139,92,246,0.2)", border: "1px solid rgba(139,92,246,0.4)", fontSize: 10, fontWeight: 700, color: "#A78BFA" }}>{t}</div>
+          <div
+            key={t}
+            style={{
+              padding: "3px 9px",
+              borderRadius: 6,
+              background: "rgba(139,92,246,0.2)",
+              border: "1px solid rgba(139,92,246,0.4)",
+              fontSize: 10,
+              fontWeight: 700,
+              color: "#A78BFA",
+            }}
+          >
+            {t}
+          </div>
         ))}
       </div>
     ),
@@ -178,10 +265,20 @@ export default function WelcomePage() {
   const [hoveredNav, setHoveredNav] = useState<number | null>(null);
 
   useEffect(() => {
+    console.log("WELCOME PAGE VERSION: 9999");
+  }, []);
+
+  useEffect(() => {
     const checkAuth = async () => {
-      if (!supabase) { router.push("/auth"); return; }
+      if (!supabase) {
+        router.push("/auth");
+        return;
+      }
       const { data } = await supabase.auth.getUser();
-      if (!data.user) { router.push("/auth"); return; }
+      if (!data.user) {
+        router.push("/auth");
+        return;
+      }
       setUserEmail(data.user.email || "");
       setLoading(false);
       setTimeout(() => setVisible(true), 80);
@@ -211,16 +308,36 @@ export default function WelcomePage() {
     return (
       <div style={S.loadingPage}>
         <div style={S.loadingSpinner} />
-        <div style={{ fontSize: 18, fontWeight: 800, color: "rgba(255,255,255,0.8)", marginTop: 20 }}>Loading R&K Analytics...</div>
+        <div style={{ fontSize: 18, fontWeight: 800, color: "rgba(255,255,255,0.8)", marginTop: 20 }}>
+          Loading R&K Analytics...
+        </div>
       </div>
     );
   }
 
   return (
     <>
+      {/* Version badge */}
+      <div
+        style={{
+          position: "fixed",
+          top: 10,
+          right: 10,
+          zIndex: 99999,
+          background: "red",
+          color: "white",
+          padding: "6px 10px",
+          borderRadius: 8,
+          fontWeight: 900,
+        }}
+      >
+        VERSION 9999
+      </div>
+
       {/* Global keyframe styles */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@400;500;700&display=swap');
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes fadeUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
         @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
         @keyframes slideLeft { from { opacity:1; transform:translateX(0); } to { opacity:0; transform:translateX(-60px); } }
@@ -243,29 +360,72 @@ export default function WelcomePage() {
         .go-btn:hover { opacity:0.88 !important; transform:scale(1.03) !important; }
       `}</style>
 
-      <div style={{
-        ...S.page,
-        animation: transitioning ? (page === 1 ? "slideLeft 0.42s ease forwards" : "slideRight 0.42s ease forwards") : (visible ? "fadeIn 0.5s ease forwards" : "none"),
-        fontFamily: "'DM Sans', system-ui, sans-serif",
-      }}>
-
+      <div
+        style={{
+          ...S.page,
+          animation: transitioning
+            ? page === 1
+              ? "slideLeft 0.42s ease forwards"
+              : "slideRight 0.42s ease forwards"
+            : visible
+              ? "fadeIn 0.5s ease forwards"
+              : "none",
+          fontFamily: "'DM Sans', system-ui, sans-serif",
+        }}
+      >
         {/* ── BACKGROUND ORBS ── */}
         <div style={{ position: "fixed", inset: 0, pointerEvents: "none", overflow: "hidden", zIndex: 0 }}>
-          <div style={{ position: "absolute", width: 700, height: 700, borderRadius: "50%", background: "radial-gradient(circle, rgba(99,102,241,0.13) 0%, transparent 70%)", top: "-200px", left: "-200px", animation: "floatOrb 8s ease-in-out infinite" }} />
-          <div style={{ position: "absolute", width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle, rgba(236,72,153,0.10) 0%, transparent 70%)", bottom: "10%", right: "-100px", animation: "floatOrb 10s ease-in-out infinite reverse" }} />
-          <div style={{ position: "absolute", width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle, rgba(6,182,212,0.08) 0%, transparent 70%)", top: "40%", left: "30%", animation: "floatOrb 12s ease-in-out infinite 2s" }} />
+          <div
+            style={{
+              position: "absolute",
+              width: 700,
+              height: 700,
+              borderRadius: "50%",
+              background: "radial-gradient(circle, rgba(99,102,241,0.13) 0%, transparent 70%)",
+              top: "-200px",
+              left: "-200px",
+              animation: "floatOrb 8s ease-in-out infinite",
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              width: 500,
+              height: 500,
+              borderRadius: "50%",
+              background: "radial-gradient(circle, rgba(236,72,153,0.10) 0%, transparent 70%)",
+              bottom: "10%",
+              right: "-100px",
+              animation: "floatOrb 10s ease-in-out infinite reverse",
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              width: 400,
+              height: 400,
+              borderRadius: "50%",
+              background: "radial-gradient(circle, rgba(6,182,212,0.08) 0%, transparent 70%)",
+              top: "40%",
+              left: "30%",
+              animation: "floatOrb 12s ease-in-out infinite 2s",
+            }}
+          />
           {/* Star dots */}
           {[...Array(20)].map((_, i) => (
-            <div key={i} style={{
-              position: "absolute",
-              width: Math.random() * 2 + 1,
-              height: Math.random() * 2 + 1,
-              borderRadius: "50%",
-              background: "#fff",
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              animation: `starTwinkle ${2 + Math.random() * 3}s ease-in-out infinite ${Math.random() * 2}s`,
-            }} />
+            <div
+              key={i}
+              style={{
+                position: "absolute",
+                width: Math.random() * 2 + 1,
+                height: Math.random() * 2 + 1,
+                borderRadius: "50%",
+                background: "#fff",
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+                animation: `starTwinkle ${2 + Math.random() * 3}s ease-in-out infinite ${Math.random() * 2}s`,
+              }}
+            />
           ))}
         </div>
 
@@ -278,19 +438,32 @@ export default function WelcomePage() {
           <div style={S.topRight}>
             {/* Page dots */}
             <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-              <div style={{ width: page === 1 ? 24 : 8, height: 8, borderRadius: 4, background: page === 1 ? "#6366F1" : "rgba(255,255,255,0.25)", transition: "all 0.3s" }} />
-              <div style={{ width: page === 2 ? 24 : 8, height: 8, borderRadius: 4, background: page === 2 ? "#6366F1" : "rgba(255,255,255,0.25)", transition: "all 0.3s" }} />
+              <div
+                style={{
+                  width: page === 1 ? 24 : 8,
+                  height: 8,
+                  borderRadius: 4,
+                  background: page === 1 ? "#6366F1" : "rgba(255,255,255,0.25)",
+                  transition: "all 0.3s",
+                }}
+              />
+              <div
+                style={{
+                  width: page === 2 ? 24 : 8,
+                  height: 8,
+                  borderRadius: 4,
+                  background: page === 2 ? "#6366F1" : "rgba(255,255,255,0.25)",
+                  transition: "all 0.3s",
+                }}
+              />
             </div>
             <div style={S.userPill}>👋 {userEmail}</div>
           </div>
         </div>
 
-        {/* ═══════════════════════════════════════════════════ */}
-        {/* PAGE 1 — HERO + FEATURES                          */}
-        {/* ═══════════════════════════════════════════════════ */}
+        {/* PAGE 1 */}
         {page === 1 && (
           <div style={{ animation: "fadeUp 0.5s ease both", position: "relative", zIndex: 1 }}>
-
             {/* HERO */}
             <section style={S.hero}>
               <div style={{ ...S.heroTag, animation: "fadeUp 0.4s ease 0.1s both" }}>
@@ -298,12 +471,19 @@ export default function WelcomePage() {
               </div>
               <h1 style={{ ...S.heroTitle, animation: "fadeUp 0.5s ease 0.2s both" }}>
                 Welcome to{" "}
-                <span style={{ background: "linear-gradient(135deg, #6366F1, #EC4899)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                <span
+                  style={{
+                    background: "linear-gradient(135deg, #6366F1, #EC4899)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                  }}
+                >
                   R&K Analytics
                 </span>
               </h1>
               <p style={{ ...S.heroSub, animation: "fadeUp 0.5s ease 0.3s both" }}>
-                Transform your data into actionable insights — real-time analytics,<br />
+                Transform your data into actionable insights — real-time analytics,
+                <br />
                 AI-powered recommendations, and professional reporting.
               </p>
 
@@ -315,9 +495,19 @@ export default function WelcomePage() {
                     <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#F59E0B" }} />
                     <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#10B981" }} />
                   </div>
-                  <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", fontWeight: 700 }}>R&K Dashboard — Live Preview</div>
+                  <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", fontWeight: 700 }}>
+                    R&K Dashboard — Live Preview
+                  </div>
                   <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                    <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#10B981", animation: "pulse 1.5s infinite" }} />
+                    <div
+                      style={{
+                        width: 6,
+                        height: 6,
+                        borderRadius: "50%",
+                        background: "#10B981",
+                        animation: "pulse 1.5s infinite",
+                      }}
+                    />
                     <span style={{ fontSize: 10, color: "#10B981", fontWeight: 700 }}>LIVE</span>
                   </div>
                 </div>
@@ -329,26 +519,73 @@ export default function WelcomePage() {
                       { label: "Avg Revenue", val: "$4,820", color: "#EC4899" },
                       { label: "Growth", val: "+18.4%", color: "#10B981" },
                     ].map((k) => (
-                      <div key={k.label} style={{ flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: 10, padding: "10px 12px", border: `1px solid ${k.color}30` }}>
-                        <div style={{ fontSize: 9, color: "rgba(255,255,255,0.45)", marginBottom: 3, fontWeight: 700 }}>{k.label}</div>
+                      <div
+                        key={k.label}
+                        style={{
+                          flex: 1,
+                          background: "rgba(255,255,255,0.04)",
+                          borderRadius: 10,
+                          padding: "10px 12px",
+                          border: `1px solid ${k.color}30`,
+                        }}
+                      >
+                        <div style={{ fontSize: 9, color: "rgba(255,255,255,0.45)", marginBottom: 3, fontWeight: 700 }}>
+                          {k.label}
+                        </div>
                         <div style={{ fontSize: 16, fontWeight: 900, color: k.color }}>{k.val}</div>
                       </div>
                     ))}
                   </div>
+
                   {/* Charts row */}
                   <div style={{ display: "flex", gap: 10 }}>
-                    <div style={{ flex: 2, background: "rgba(255,255,255,0.03)", borderRadius: 10, padding: "10px 14px", border: "1px solid rgba(255,255,255,0.06)" }}>
-                      <div style={{ fontSize: 9, color: "rgba(255,255,255,0.45)", fontWeight: 700, marginBottom: 4 }}>Revenue Trend</div>
+                    <div
+                      style={{
+                        flex: 2,
+                        background: "rgba(255,255,255,0.03)",
+                        borderRadius: 10,
+                        padding: "10px 14px",
+                        border: "1px solid rgba(255,255,255,0.06)",
+                      }}
+                    >
+                      <div style={{ fontSize: 9, color: "rgba(255,255,255,0.45)", fontWeight: 700, marginBottom: 4 }}>
+                        Revenue Trend
+                      </div>
                       <MiniLineChart />
                     </div>
-                    <div style={{ flex: 1, background: "rgba(255,255,255,0.03)", borderRadius: 10, padding: "10px", border: "1px solid rgba(255,255,255,0.06)", display: "flex", flexDirection: "column", alignItems: "center" }}>
-                      <div style={{ fontSize: 9, color: "rgba(255,255,255,0.45)", fontWeight: 700, marginBottom: 4 }}>Status</div>
+
+                    <div
+                      style={{
+                        flex: 1,
+                        background: "rgba(255,255,255,0.03)",
+                        borderRadius: 10,
+                        padding: "10px",
+                        border: "1px solid rgba(255,255,255,0.06)",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                      }}
+                    >
+                      <div style={{ fontSize: 9, color: "rgba(255,255,255,0.45)", fontWeight: 700, marginBottom: 4 }}>
+                        Status
+                      </div>
                       <MiniDonut />
                     </div>
                   </div>
+
                   {/* Bar */}
-                  <div style={{ marginTop: 10, background: "rgba(255,255,255,0.03)", borderRadius: 10, padding: "10px 14px", border: "1px solid rgba(255,255,255,0.06)" }}>
-                    <div style={{ fontSize: 9, color: "rgba(255,255,255,0.45)", fontWeight: 700, marginBottom: 4 }}>Sales by Region</div>
+                  <div
+                    style={{
+                      marginTop: 10,
+                      background: "rgba(255,255,255,0.03)",
+                      borderRadius: 10,
+                      padding: "10px 14px",
+                      border: "1px solid rgba(255,255,255,0.06)",
+                    }}
+                  >
+                    <div style={{ fontSize: 9, color: "rgba(255,255,255,0.45)", fontWeight: 700, marginBottom: 4 }}>
+                      Sales by Region
+                    </div>
                     <MiniBarChart />
                   </div>
                 </div>
@@ -376,22 +613,33 @@ export default function WelcomePage() {
                       transition: "all 0.3s ease",
                     }}
                   >
-                    {/* Top row */}
                     <div style={{ display: "flex", alignItems: "flex-start", gap: 14, marginBottom: 16 }}>
                       <div style={{ ...S.featureIconBox, background: `${f.color}20`, border: `1px solid ${f.color}40` }}>
                         <span style={{ fontSize: 26 }}>{f.icon}</span>
                       </div>
                       <div style={{ flex: 1 }}>
-                        <div style={{ ...S.featureTitle }}>{f.title}</div>
-                        <div style={{ padding: "3px 8px", borderRadius: 6, background: `${f.color}18`, border: `1px solid ${f.color}35`, display: "inline-block", fontSize: 10, fontWeight: 800, color: f.color, marginTop: 4 }}>{f.tag}</div>
+                        <div style={S.featureTitle}>{f.title}</div>
+                        <div
+                          style={{
+                            padding: "3px 8px",
+                            borderRadius: 6,
+                            background: `${f.color}18`,
+                            border: `1px solid ${f.color}35`,
+                            display: "inline-block",
+                            fontSize: 10,
+                            fontWeight: 800,
+                            color: f.color,
+                            marginTop: 4,
+                          }}
+                        >
+                          {f.tag}
+                        </div>
                       </div>
                     </div>
-                    {/* Description */}
+
                     <p style={S.featureDesc}>{f.desc}</p>
-                    {/* Preview */}
-                    <div style={{ ...S.featurePreview, borderColor: `${f.color}20` }}>
-                      {f.preview}
-                    </div>
+
+                    <div style={{ ...S.featurePreview, borderColor: `${f.color}20` }}>{f.preview}</div>
                   </div>
                 ))}
               </div>
@@ -401,8 +649,7 @@ export default function WelcomePage() {
             <div style={S.nextSection}>
               <div style={S.nextHint}>Looks good? Let's get you started →</div>
               <button className="next-btn" onClick={goToPage2} style={S.nextBtn}>
-                Continue to Setup
-                <span style={{ marginLeft: 10, fontSize: 20 }}>→</span>
+                Continue to Setup <span style={{ marginLeft: 10, fontSize: 20 }}>→</span>
               </button>
               <div style={{ marginTop: 16, fontSize: 13, color: "rgba(255,255,255,0.35)" }}>
                 Step 1 of 2 — See how to get started
@@ -411,20 +658,15 @@ export default function WelcomePage() {
           </div>
         )}
 
-        {/* ═══════════════════════════════════════════════════ */}
-        {/* PAGE 2 — GET STARTED + NAVIGATION                 */}
-        {/* ═══════════════════════════════════════════════════ */}
+        {/* PAGE 2 */}
         {page === 2 && (
           <div style={{ animation: "slideInLeft 0.45s ease both", position: "relative", zIndex: 1 }}>
-
-            {/* Back button */}
             <div style={{ maxWidth: 1200, margin: "0 auto", padding: "20px 24px 0" }}>
               <button className="back-btn" onClick={goToPage1} style={S.backBtn}>
                 ← Back
               </button>
             </div>
 
-            {/* GET STARTED */}
             <section style={S.stepsSection}>
               <div style={S.sectionLabel}>QUICK SETUP</div>
               <h2 style={S.sectionTitle}>🚀 Get Started in 3 Steps</h2>
@@ -471,7 +713,9 @@ export default function WelcomePage() {
                     }}
                   >
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
-                      <div style={{ ...S.stepNumBadge, background: `${step.color}18`, border: `1px solid ${step.color}40`, color: step.color }}>{step.num}</div>
+                      <div style={{ ...S.stepNumBadge, background: `${step.color}18`, border: `1px solid ${step.color}40`, color: step.color }}>
+                        {step.num}
+                      </div>
                       <div style={{ fontSize: 40 }}>{step.icon}</div>
                     </div>
                     <div style={S.stepTitle}>{step.title}</div>
@@ -488,7 +732,6 @@ export default function WelcomePage() {
               </div>
             </section>
 
-            {/* QUICK NAVIGATION */}
             <section style={S.navSection}>
               <div style={S.sectionLabel}>NAVIGATION</div>
               <h2 style={S.sectionTitle}>🧭 Quick Navigation</h2>
@@ -521,7 +764,6 @@ export default function WelcomePage() {
               </div>
             </section>
 
-            {/* CTA */}
             <section style={S.ctaSection}>
               <div style={S.ctaCard}>
                 <div style={{ fontSize: 52, marginBottom: 16 }}>🎉</div>
@@ -538,12 +780,13 @@ export default function WelcomePage() {
               </div>
             </section>
 
-            {/* Footer */}
             <footer style={S.footer}>
               <div style={S.footerInner}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                   <div style={S.footerLogo}>R&K</div>
-                  <span style={{ fontSize: 13, color: "rgba(255,255,255,0.45)", fontWeight: 700 }}>AI-Powered Analytics Platform</span>
+                  <span style={{ fontSize: 13, color: "rgba(255,255,255,0.45)", fontWeight: 700 }}>
+                    AI-Powered Analytics Platform
+                  </span>
                 </div>
                 <button onClick={() => router.push("/home")} style={S.footerLink}>
                   Continue to Home →
@@ -583,7 +826,6 @@ const S: Record<string, React.CSSProperties> = {
     animation: "spin 0.8s linear infinite",
   },
 
-  // TOP BAR
   topBar: {
     position: "sticky",
     top: 0,
@@ -598,23 +840,34 @@ const S: Record<string, React.CSSProperties> = {
   },
   topLogo: { display: "flex", alignItems: "center", gap: 12 },
   topLogoIcon: {
-    width: 38, height: 38, borderRadius: 10,
+    width: 38,
+    height: 38,
+    borderRadius: 10,
     background: "linear-gradient(135deg, #6366F1, #EC4899)",
-    display: "flex", alignItems: "center", justifyContent: "center",
-    fontSize: 15, fontWeight: 900, color: "#fff",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: 15,
+    fontWeight: 900,
+    color: "#fff",
     boxShadow: "0 4px 14px rgba(99,102,241,0.4)",
   },
   topLogoText: { fontSize: 17, fontWeight: 800, color: "#fff" },
   topRight: { display: "flex", alignItems: "center", gap: 20 },
   userPill: {
-    padding: "7px 16px", borderRadius: 999,
+    padding: "7px 16px",
+    borderRadius: 999,
     background: "rgba(99,102,241,0.12)",
     border: "1px solid rgba(99,102,241,0.25)",
-    fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,0.85)",
-    maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+    fontSize: 13,
+    fontWeight: 700,
+    color: "rgba(255,255,255,0.85)",
+    maxWidth: 200,
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
   },
 
-  // HERO
   hero: {
     maxWidth: 900,
     margin: "0 auto",
@@ -625,10 +878,13 @@ const S: Record<string, React.CSSProperties> = {
     alignItems: "center",
   },
   heroTag: {
-    padding: "6px 18px", borderRadius: 999,
+    padding: "6px 18px",
+    borderRadius: 999,
     background: "rgba(99,102,241,0.12)",
     border: "1px solid rgba(99,102,241,0.30)",
-    fontSize: 13, fontWeight: 700, color: "rgba(200,200,255,0.85)",
+    fontSize: 13,
+    fontWeight: 700,
+    color: "rgba(200,200,255,0.85)",
     marginBottom: 24,
     display: "inline-block",
   },
@@ -648,7 +904,6 @@ const S: Record<string, React.CSSProperties> = {
     margin: "0 0 36px",
   },
 
-  // DASHBOARD PREVIEW
   dashPreview: {
     width: "100%",
     maxWidth: 680,
@@ -659,27 +914,38 @@ const S: Record<string, React.CSSProperties> = {
     boxShadow: "0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(99,102,241,0.1)",
   },
   dashPreviewHeader: {
-    display: "flex", alignItems: "center", justifyContent: "space-between",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
     padding: "12px 18px",
     background: "rgba(255,255,255,0.04)",
     borderBottom: "1px solid rgba(255,255,255,0.06)",
   },
   dashPreviewBody: { padding: "18px 20px" },
 
-  // FEATURES
   featuresSection: { maxWidth: 1200, margin: "0 auto", padding: "60px 24px" },
   sectionLabel: {
-    fontSize: 12, fontWeight: 800, letterSpacing: "0.15em",
-    color: "rgba(99,102,241,0.8)", textAlign: "center", marginBottom: 12,
+    fontSize: 12,
+    fontWeight: 800,
+    letterSpacing: "0.15em",
+    color: "rgba(99,102,241,0.8)",
+    textAlign: "center",
+    marginBottom: 12,
   },
   sectionTitle: {
-    fontSize: "clamp(26px, 4vw, 42px)", fontWeight: 900,
-    color: "#fff", textAlign: "center", margin: "0 0 12px",
+    fontSize: "clamp(26px, 4vw, 42px)",
+    fontWeight: 900,
+    color: "#fff",
+    textAlign: "center",
+    margin: "0 0 12px",
     fontFamily: "'Syne', sans-serif",
   },
   sectionSub: {
-    fontSize: 16, color: "rgba(255,255,255,0.5)",
-    textAlign: "center", maxWidth: 500, margin: "0 auto 48px",
+    fontSize: 16,
+    color: "rgba(255,255,255,0.5)",
+    textAlign: "center",
+    maxWidth: 500,
+    margin: "0 auto 48px",
   },
   featureGrid: {
     display: "grid",
@@ -694,20 +960,24 @@ const S: Record<string, React.CSSProperties> = {
     cursor: "default",
   },
   featureIconBox: {
-    width: 54, height: 54, borderRadius: 14,
-    display: "flex", alignItems: "center", justifyContent: "center",
+    width: 54,
+    height: 54,
+    borderRadius: 14,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
     flexShrink: 0,
   },
   featureTitle: { fontSize: 18, fontWeight: 800, color: "#fff" },
   featureDesc: { fontSize: 14, color: "rgba(255,255,255,0.58)", lineHeight: 1.65, margin: "0 0 14px" },
   featurePreview: {
-    padding: "14px 16px", borderRadius: 12,
+    padding: "14px 16px",
+    borderRadius: 12,
     background: "rgba(255,255,255,0.03)",
     border: "1px solid transparent",
     minHeight: 60,
   },
 
-  // NEXT BUTTON SECTION
   nextSection: {
     textAlign: "center",
     padding: "40px 24px 80px",
@@ -718,7 +988,8 @@ const S: Record<string, React.CSSProperties> = {
   },
   nextHint: { fontSize: 15, color: "rgba(255,255,255,0.45)", fontWeight: 600 },
   nextBtn: {
-    display: "flex", alignItems: "center",
+    display: "flex",
+    alignItems: "center",
     padding: "18px 48px",
     borderRadius: 16,
     border: "none",
@@ -732,17 +1003,18 @@ const S: Record<string, React.CSSProperties> = {
     fontFamily: "'Syne', sans-serif",
   },
 
-  // PAGE 2 — BACK
   backBtn: {
-    padding: "9px 20px", borderRadius: 10,
+    padding: "9px 20px",
+    borderRadius: 10,
     border: "1px solid rgba(255,255,255,0.15)",
     background: "rgba(255,255,255,0.06)",
     color: "rgba(255,255,255,0.75)",
-    fontSize: 14, fontWeight: 700, cursor: "pointer",
+    fontSize: 14,
+    fontWeight: 700,
+    cursor: "pointer",
     transition: "border-color 0.2s",
   },
 
-  // STEPS
   stepsSection: { maxWidth: 1100, margin: "0 auto", padding: "50px 24px" },
   stepsGrid: {
     display: "grid",
@@ -754,21 +1026,29 @@ const S: Record<string, React.CSSProperties> = {
     border: "1px solid rgba(255,255,255,0.07)",
     borderRadius: 22,
     padding: 32,
-    display: "flex", flexDirection: "column",
+    display: "flex",
+    flexDirection: "column",
   },
   stepNumBadge: {
-    padding: "5px 12px", borderRadius: 8,
-    fontSize: 13, fontWeight: 900, letterSpacing: "0.05em",
+    padding: "5px 12px",
+    borderRadius: 8,
+    fontSize: 13,
+    fontWeight: 900,
+    letterSpacing: "0.05em",
   },
   stepTitle: { fontSize: 20, fontWeight: 800, color: "#fff", marginBottom: 10 },
   stepDesc: { fontSize: 14, color: "rgba(255,255,255,0.58)", lineHeight: 1.65, flex: 1, margin: "0 0 24px" },
   stepBtn: {
-    padding: "13px 22px", borderRadius: 12, border: "none",
-    color: "#fff", fontSize: 14, fontWeight: 800, cursor: "pointer",
+    padding: "13px 22px",
+    borderRadius: 12,
+    border: "none",
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: 800,
+    cursor: "pointer",
     transition: "all 0.2s",
   },
 
-  // NAV
   navSection: { maxWidth: 1100, margin: "0 auto", padding: "40px 24px 60px" },
   navGrid: {
     display: "grid",
@@ -778,25 +1058,33 @@ const S: Record<string, React.CSSProperties> = {
   navCard: {
     background: "rgba(15,23,42,0.88)",
     border: "1px solid rgba(255,255,255,0.07)",
-    borderRadius: 18, padding: "24px 20px",
+    borderRadius: 18,
+    padding: "24px 20px",
     cursor: "pointer",
-    display: "flex", flexDirection: "column", alignItems: "center",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
     textAlign: "center",
     color: "#E5E7EB",
   },
   navIconBox: {
-    width: 56, height: 56, borderRadius: 14, marginBottom: 14,
-    display: "flex", alignItems: "center", justifyContent: "center",
+    width: 56,
+    height: 56,
+    borderRadius: 14,
+    marginBottom: 14,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
   },
   navLabel: { fontSize: 16, fontWeight: 800, color: "#fff", marginBottom: 6 },
   navDesc: { fontSize: 12, color: "rgba(255,255,255,0.50)", lineHeight: 1.5 },
 
-  // CTA
   ctaSection: { maxWidth: 780, margin: "0 auto", padding: "20px 24px 60px" },
   ctaCard: {
     background: "linear-gradient(135deg, rgba(99,102,241,0.18), rgba(236,72,153,0.12))",
     border: "1px solid rgba(255,255,255,0.12)",
-    borderRadius: 28, padding: "56px 40px",
+    borderRadius: 28,
+    padding: "56px 40px",
     textAlign: "center",
     boxShadow: "0 30px 80px rgba(99,102,241,0.2)",
   },
@@ -804,36 +1092,59 @@ const S: Record<string, React.CSSProperties> = {
   ctaDesc: { fontSize: 16, color: "rgba(255,255,255,0.6)", margin: "0 0 36px" },
   ctaBtns: { display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" },
   ctaPrimary: {
-    padding: "15px 36px", borderRadius: 14, border: "none",
+    padding: "15px 36px",
+    borderRadius: 14,
+    border: "none",
     background: "linear-gradient(135deg, #6366F1, #EC4899)",
-    color: "#fff", fontSize: 16, fontWeight: 900, cursor: "pointer",
-    boxShadow: "0 10px 30px rgba(99,102,241,0.4)", transition: "all 0.2s",
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: 900,
+    cursor: "pointer",
+    boxShadow: "0 10px 30px rgba(99,102,241,0.4)",
+    transition: "all 0.2s",
   },
   ctaSecondary: {
-    padding: "15px 36px", borderRadius: 14,
+    padding: "15px 36px",
+    borderRadius: 14,
     border: "1px solid rgba(255,255,255,0.2)",
     background: "rgba(255,255,255,0.07)",
-    color: "#E5E7EB", fontSize: 16, fontWeight: 900, cursor: "pointer",
+    color: "#E5E7EB",
+    fontSize: 16,
+    fontWeight: 900,
+    cursor: "pointer",
     transition: "all 0.2s",
   },
 
-  // FOOTER
   footer: { borderTop: "1px solid rgba(255,255,255,0.07)", padding: "28px 24px" },
   footerInner: {
-    maxWidth: 1100, margin: "0 auto",
-    display: "flex", justifyContent: "space-between", alignItems: "center",
-    flexWrap: "wrap", gap: 16,
+    maxWidth: 1100,
+    margin: "0 auto",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: 16,
   },
   footerLogo: {
-    width: 40, height: 40, borderRadius: 10,
+    width: 40,
+    height: 40,
+    borderRadius: 10,
     background: "linear-gradient(135deg, #6366F1, #EC4899)",
-    display: "flex", alignItems: "center", justifyContent: "center",
-    fontSize: 15, fontWeight: 900, color: "#fff",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: 15,
+    fontWeight: 900,
+    color: "#fff",
   },
   footerLink: {
-    padding: "10px 20px", borderRadius: 10,
+    padding: "10px 20px",
+    borderRadius: 10,
     border: "1px solid rgba(255,255,255,0.12)",
     background: "rgba(255,255,255,0.06)",
-    color: "#E5E7EB", fontSize: 14, fontWeight: 800, cursor: "pointer",
+    color: "#E5E7EB",
+    fontSize: 14,
+    fontWeight: 800,
+    cursor: "pointer",
   },
 };
