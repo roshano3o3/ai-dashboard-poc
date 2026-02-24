@@ -308,6 +308,14 @@ const NAV_ITEMS = [
     href: "/branding",
     color: "#EC4899",
   },
+  {
+    icon: "👥",
+    label: "Custom Dashboard",
+    desc: "Customize your dashboard",
+    href: "/custom_dashboard",
+    color: "#EC4899",
+  },
+
 ];
 
 // ─── MAIN COMPONENT ───────────────────────────────────────────
