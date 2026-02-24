@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 
@@ -127,7 +127,7 @@ const FEATURES = [
       <div
         style={{
           fontSize: 11,
-          color: "rgba(255,255,255,0.7)",
+          color: "rgba(255,255,255,0.72)", // ↑ contrast
           lineHeight: 1.5,
           padding: "4px 0",
         }}
@@ -159,7 +159,14 @@ const FEATURES = [
     color: "#10B981",
     glow: "rgba(16,185,129,0.35)",
     preview: (
-      <div style={{ display: "flex", gap: 6, justifyContent: "center", paddingTop: 4 }}>
+      <div
+        style={{
+          display: "flex",
+          gap: 6,
+          justifyContent: "center",
+          paddingTop: 4,
+        }}
+      >
         {["PDF", "XLSX", "CSV"].map((t) => (
           <div
             key={t}
@@ -206,7 +213,13 @@ const FEATURES = [
             animation: "pulse 1.5s infinite",
           }}
         />
-        <span style={{ fontSize: 12, color: "rgba(255,255,255,0.8)", fontWeight: 700 }}>
+        <span
+          style={{
+            fontSize: 12,
+            color: "rgba(255,255,255,0.82)", // ↑ contrast
+            fontWeight: 700,
+          }}
+        >
           Live — Updated 2s ago
         </span>
       </div>
@@ -220,7 +233,15 @@ const FEATURES = [
     color: "#8B5CF6",
     glow: "rgba(139,92,246,0.35)",
     preview: (
-      <div style={{ display: "flex", gap: 5, justifyContent: "center", flexWrap: "wrap", paddingTop: 4 }}>
+      <div
+        style={{
+          display: "flex",
+          gap: 5,
+          justifyContent: "center",
+          flexWrap: "wrap",
+          paddingTop: 4,
+        }}
+      >
         {["Sales", "HR", "Finance", "Marketing"].map((t) => (
           <div
             key={t}
@@ -245,12 +266,48 @@ const FEATURES = [
 
 // ─── NAV ITEMS ────────────────────────────────────────────────
 const NAV_ITEMS = [
-  { icon: "📊", label: "Dashboard", desc: "View your data visualizations", href: "/dashboard", color: "#6366F1" },
-  { icon: "📈", label: "Analytics", desc: "Advanced analysis tools", href: "/analytics", color: "#06B6D4" },
-  { icon: "📋", label: "Tables", desc: "View and manage data", href: "/data", color: "#10B981" },
-  { icon: "⬆️", label: "Upload", desc: "Import new datasets", href: "/upload", color: "#F59E0B" },
-  { icon: "🎨", label: "Templates", desc: "Pre-built dashboards", href: "/templates", color: "#8B5CF6" },
-  { icon: "⚙️", label: "Branding", desc: "Customize your look", href: "/branding", color: "#EC4899" },
+  {
+    icon: "📊",
+    label: "Dashboard",
+    desc: "View your data visualizations",
+    href: "/dashboard",
+    color: "#6366F1",
+  },
+  {
+    icon: "📈",
+    label: "Analytics",
+    desc: "Advanced analysis tools",
+    href: "/analytics",
+    color: "#06B6D4",
+  },
+  {
+    icon: "📋",
+    label: "Tables",
+    desc: "View and manage data",
+    href: "/data",
+    color: "#10B981",
+  },
+  {
+    icon: "⬆️",
+    label: "Upload",
+    desc: "Import new datasets",
+    href: "/upload",
+    color: "#F59E0B",
+  },
+  {
+    icon: "🎨",
+    label: "Templates",
+    desc: "Pre-built dashboards",
+    href: "/templates",
+    color: "#8B5CF6",
+  },
+  {
+    icon: "⚙️",
+    label: "Branding",
+    desc: "Customize your look",
+    href: "/branding",
+    color: "#EC4899",
+  },
 ];
 
 // ─── MAIN COMPONENT ───────────────────────────────────────────
@@ -264,8 +321,15 @@ export default function WelcomePage() {
   const [hoveredFeature, setHoveredFeature] = useState<number | null>(null);
   const [hoveredNav, setHoveredNav] = useState<number | null>(null);
 
-  useEffect(() => {
-    console.log("WELCOME PAGE VERSION: 9999");
+  // Optional: stabilize stars so they don't "jump" on re-render
+  const stars = useMemo(() => {
+    return Array.from({ length: 20 }).map(() => ({
+      size: Math.random() * 2 + 1,
+      top: `${Math.random() * 100}%`,
+      left: `${Math.random() * 100}%`,
+      dur: `${2 + Math.random() * 3}s`,
+      delay: `${Math.random() * 2}s`,
+    }));
   }, []);
 
   useEffect(() => {
@@ -308,7 +372,14 @@ export default function WelcomePage() {
     return (
       <div style={S.loadingPage}>
         <div style={S.loadingSpinner} />
-        <div style={{ fontSize: 18, fontWeight: 800, color: "rgba(255,255,255,0.8)", marginTop: 20 }}>
+        <div
+          style={{
+            fontSize: 18,
+            fontWeight: 800,
+            color: "rgba(255,255,255,0.82)", // ↑ contrast
+            marginTop: 20,
+          }}
+        >
           Loading R&K Analytics...
         </div>
       </div>
@@ -317,26 +388,9 @@ export default function WelcomePage() {
 
   return (
     <>
-      {/* Version badge */}
-      <div
-        style={{
-          position: "fixed",
-          top: 10,
-          right: 10,
-          zIndex: 99999,
-          background: "red",
-          color: "white",
-          padding: "6px 10px",
-          borderRadius: 8,
-          fontWeight: 900,
-        }}
-      >
-        VERSION 9999
-      </div>
-
-      {/* Global keyframe styles */}
+      {/* Global keyframe styles + Inter font */}
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@400;500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes fadeUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
         @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
@@ -352,6 +406,7 @@ export default function WelcomePage() {
         @keyframes shimmer { 0% { background-position:-200% 0; } 100% { background-position:200% 0; } }
         @keyframes starTwinkle { 0%,100% { opacity:0.3; } 50% { opacity:1; } }
         @keyframes progressFill { from { width:0%; } to { width:50%; } }
+
         .feature-card:hover { transform:translateY(-6px) scale(1.02) !important; }
         .nav-card:hover { transform:translateY(-4px) !important; }
         .step-card:hover { transform:translateY(-4px) !important; }
@@ -368,20 +423,30 @@ export default function WelcomePage() {
               ? "slideLeft 0.42s ease forwards"
               : "slideRight 0.42s ease forwards"
             : visible
-              ? "fadeIn 0.5s ease forwards"
-              : "none",
-          fontFamily: "'DM Sans', system-ui, sans-serif",
+            ? "fadeIn 0.5s ease forwards"
+            : "none",
+          fontFamily:
+            "'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif",
         }}
       >
         {/* ── BACKGROUND ORBS ── */}
-        <div style={{ position: "fixed", inset: 0, pointerEvents: "none", overflow: "hidden", zIndex: 0 }}>
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            pointerEvents: "none",
+            overflow: "hidden",
+            zIndex: 0,
+          }}
+        >
           <div
             style={{
               position: "absolute",
               width: 700,
               height: 700,
               borderRadius: "50%",
-              background: "radial-gradient(circle, rgba(99,102,241,0.13) 0%, transparent 70%)",
+              background:
+                "radial-gradient(circle, rgba(99,102,241,0.13) 0%, transparent 70%)",
               top: "-200px",
               left: "-200px",
               animation: "floatOrb 8s ease-in-out infinite",
@@ -393,7 +458,8 @@ export default function WelcomePage() {
               width: 500,
               height: 500,
               borderRadius: "50%",
-              background: "radial-gradient(circle, rgba(236,72,153,0.10) 0%, transparent 70%)",
+              background:
+                "radial-gradient(circle, rgba(236,72,153,0.10) 0%, transparent 70%)",
               bottom: "10%",
               right: "-100px",
               animation: "floatOrb 10s ease-in-out infinite reverse",
@@ -405,25 +471,27 @@ export default function WelcomePage() {
               width: 400,
               height: 400,
               borderRadius: "50%",
-              background: "radial-gradient(circle, rgba(6,182,212,0.08) 0%, transparent 70%)",
+              background:
+                "radial-gradient(circle, rgba(6,182,212,0.08) 0%, transparent 70%)",
               top: "40%",
               left: "30%",
               animation: "floatOrb 12s ease-in-out infinite 2s",
             }}
           />
-          {/* Star dots */}
-          {[...Array(20)].map((_, i) => (
+
+          {/* Star dots (stable) */}
+          {stars.map((s, i) => (
             <div
               key={i}
               style={{
                 position: "absolute",
-                width: Math.random() * 2 + 1,
-                height: Math.random() * 2 + 1,
+                width: s.size,
+                height: s.size,
                 borderRadius: "50%",
                 background: "#fff",
-                top: `${Math.random() * 100}%`,
-                left: `${Math.random() * 100}%`,
-                animation: `starTwinkle ${2 + Math.random() * 3}s ease-in-out infinite ${Math.random() * 2}s`,
+                top: s.top,
+                left: s.left,
+                animation: `starTwinkle ${s.dur} ease-in-out infinite ${s.delay}`,
               }}
             />
           ))}
@@ -436,7 +504,6 @@ export default function WelcomePage() {
             <span style={S.topLogoText}>Analytics</span>
           </div>
           <div style={S.topRight}>
-            {/* Page dots */}
             <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
               <div
                 style={{
@@ -463,12 +530,18 @@ export default function WelcomePage() {
 
         {/* PAGE 1 */}
         {page === 1 && (
-          <div style={{ animation: "fadeUp 0.5s ease both", position: "relative", zIndex: 1 }}>
-            {/* HERO */}
+          <div
+            style={{
+              animation: "fadeUp 0.5s ease both",
+              position: "relative",
+              zIndex: 1,
+            }}
+          >
             <section style={S.hero}>
               <div style={{ ...S.heroTag, animation: "fadeUp 0.4s ease 0.1s both" }}>
                 ✨ AI-Powered Business Intelligence
               </div>
+
               <h1 style={{ ...S.heroTitle, animation: "fadeUp 0.5s ease 0.2s both" }}>
                 Welcome to{" "}
                 <span
@@ -481,13 +554,13 @@ export default function WelcomePage() {
                   R&K Analytics
                 </span>
               </h1>
+
               <p style={{ ...S.heroSub, animation: "fadeUp 0.5s ease 0.3s both" }}>
                 Transform your data into actionable insights — real-time analytics,
                 <br />
                 AI-powered recommendations, and professional reporting.
               </p>
 
-              {/* MINI DASHBOARD PREVIEW */}
               <div style={{ ...S.dashPreview, animation: "fadeUp 0.6s ease 0.4s both" }}>
                 <div style={S.dashPreviewHeader}>
                   <div style={{ display: "flex", gap: 6 }}>
@@ -495,9 +568,17 @@ export default function WelcomePage() {
                     <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#F59E0B" }} />
                     <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#10B981" }} />
                   </div>
-                  <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", fontWeight: 700 }}>
+
+                  <div
+                    style={{
+                      fontSize: 11,
+                      color: "rgba(255,255,255,0.66)", // ↑ contrast
+                      fontWeight: 700,
+                    }}
+                  >
                     R&K Dashboard — Live Preview
                   </div>
+
                   <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                     <div
                       style={{
@@ -508,11 +589,13 @@ export default function WelcomePage() {
                         animation: "pulse 1.5s infinite",
                       }}
                     />
-                    <span style={{ fontSize: 10, color: "#10B981", fontWeight: 700 }}>LIVE</span>
+                    <span style={{ fontSize: 10, color: "#10B981", fontWeight: 700 }}>
+                      LIVE
+                    </span>
                   </div>
                 </div>
+
                 <div style={S.dashPreviewBody}>
-                  {/* KPI row */}
                   <div style={{ display: "flex", gap: 10, marginBottom: 14 }}>
                     {[
                       { label: "Total Records", val: "1,284", color: "#6366F1" },
@@ -529,15 +612,23 @@ export default function WelcomePage() {
                           border: `1px solid ${k.color}30`,
                         }}
                       >
-                        <div style={{ fontSize: 9, color: "rgba(255,255,255,0.45)", marginBottom: 3, fontWeight: 700 }}>
+                        <div
+                          style={{
+                            fontSize: 9,
+                            color: "rgba(255,255,255,0.62)", // ↑ contrast
+                            marginBottom: 3,
+                            fontWeight: 700,
+                          }}
+                        >
                           {k.label}
                         </div>
-                        <div style={{ fontSize: 16, fontWeight: 900, color: k.color }}>{k.val}</div>
+                        <div style={{ fontSize: 16, fontWeight: 900, color: k.color }}>
+                          {k.val}
+                        </div>
                       </div>
                     ))}
                   </div>
 
-                  {/* Charts row */}
                   <div style={{ display: "flex", gap: 10 }}>
                     <div
                       style={{
@@ -548,7 +639,14 @@ export default function WelcomePage() {
                         border: "1px solid rgba(255,255,255,0.06)",
                       }}
                     >
-                      <div style={{ fontSize: 9, color: "rgba(255,255,255,0.45)", fontWeight: 700, marginBottom: 4 }}>
+                      <div
+                        style={{
+                          fontSize: 9,
+                          color: "rgba(255,255,255,0.62)", // ↑ contrast
+                          fontWeight: 700,
+                          marginBottom: 4,
+                        }}
+                      >
                         Revenue Trend
                       </div>
                       <MiniLineChart />
@@ -566,14 +664,20 @@ export default function WelcomePage() {
                         alignItems: "center",
                       }}
                     >
-                      <div style={{ fontSize: 9, color: "rgba(255,255,255,0.45)", fontWeight: 700, marginBottom: 4 }}>
+                      <div
+                        style={{
+                          fontSize: 9,
+                          color: "rgba(255,255,255,0.62)", // ↑ contrast
+                          fontWeight: 700,
+                          marginBottom: 4,
+                        }}
+                      >
                         Status
                       </div>
                       <MiniDonut />
                     </div>
                   </div>
 
-                  {/* Bar */}
                   <div
                     style={{
                       marginTop: 10,
@@ -583,7 +687,14 @@ export default function WelcomePage() {
                       border: "1px solid rgba(255,255,255,0.06)",
                     }}
                   >
-                    <div style={{ fontSize: 9, color: "rgba(255,255,255,0.45)", fontWeight: 700, marginBottom: 4 }}>
+                    <div
+                      style={{
+                        fontSize: 9,
+                        color: "rgba(255,255,255,0.62)", // ↑ contrast
+                        fontWeight: 700,
+                        marginBottom: 4,
+                      }}
+                    >
                       Sales by Region
                     </div>
                     <MiniBarChart />
@@ -592,11 +703,12 @@ export default function WelcomePage() {
               </div>
             </section>
 
-            {/* WHAT YOU CAN DO */}
             <section style={S.featuresSection}>
               <div style={S.sectionLabel}>CAPABILITIES</div>
               <h2 style={S.sectionTitle}>✨ What You Can Do</h2>
-              <p style={S.sectionSub}>Everything you need to turn raw data into business decisions</p>
+              <p style={S.sectionSub}>
+                Everything you need to turn raw data into business decisions
+              </p>
 
               <div style={S.featureGrid}>
                 {FEATURES.map((f, i) => (
@@ -607,16 +719,27 @@ export default function WelcomePage() {
                     onMouseLeave={() => setHoveredFeature(null)}
                     style={{
                       ...S.featureCard,
-                      borderColor: hoveredFeature === i ? `${f.color}60` : "rgba(255,255,255,0.07)",
-                      boxShadow: hoveredFeature === i ? `0 20px 50px ${f.glow}` : "0 4px 20px rgba(0,0,0,0.3)",
+                      borderColor:
+                        hoveredFeature === i ? `${f.color}60` : "rgba(255,255,255,0.07)",
+                      boxShadow:
+                        hoveredFeature === i
+                          ? `0 20px 50px ${f.glow}`
+                          : "0 4px 20px rgba(0,0,0,0.3)",
                       animation: `fadeUp 0.5s ease ${0.1 + i * 0.07}s both`,
                       transition: "all 0.3s ease",
                     }}
                   >
                     <div style={{ display: "flex", alignItems: "flex-start", gap: 14, marginBottom: 16 }}>
-                      <div style={{ ...S.featureIconBox, background: `${f.color}20`, border: `1px solid ${f.color}40` }}>
+                      <div
+                        style={{
+                          ...S.featureIconBox,
+                          background: `${f.color}20`,
+                          border: `1px solid ${f.color}40`,
+                        }}
+                      >
                         <span style={{ fontSize: 26 }}>{f.icon}</span>
                       </div>
+
                       <div style={{ flex: 1 }}>
                         <div style={S.featureTitle}>{f.title}</div>
                         <div
@@ -639,19 +762,20 @@ export default function WelcomePage() {
 
                     <p style={S.featureDesc}>{f.desc}</p>
 
-                    <div style={{ ...S.featurePreview, borderColor: `${f.color}20` }}>{f.preview}</div>
+                    <div style={{ ...S.featurePreview, borderColor: `${f.color}20` }}>
+                      {f.preview}
+                    </div>
                   </div>
                 ))}
               </div>
             </section>
 
-            {/* NEXT BUTTON */}
             <div style={S.nextSection}>
               <div style={S.nextHint}>Looks good? Let's get you started →</div>
               <button className="next-btn" onClick={goToPage2} style={S.nextBtn}>
                 Continue to Setup <span style={{ marginLeft: 10, fontSize: 20 }}>→</span>
               </button>
-              <div style={{ marginTop: 16, fontSize: 13, color: "rgba(255,255,255,0.35)" }}>
+              <div style={{ marginTop: 16, fontSize: 13, color: "rgba(255,255,255,0.58)" }}>
                 Step 1 of 2 — See how to get started
               </div>
             </div>
@@ -713,17 +837,29 @@ export default function WelcomePage() {
                     }}
                   >
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
-                      <div style={{ ...S.stepNumBadge, background: `${step.color}18`, border: `1px solid ${step.color}40`, color: step.color }}>
+                      <div
+                        style={{
+                          ...S.stepNumBadge,
+                          background: `${step.color}18`,
+                          border: `1px solid ${step.color}40`,
+                          color: step.color,
+                        }}
+                      >
                         {step.num}
                       </div>
                       <div style={{ fontSize: 40 }}>{step.icon}</div>
                     </div>
+
                     <div style={S.stepTitle}>{step.title}</div>
                     <p style={S.stepDesc}>{step.desc}</p>
+
                     <button
                       className="go-btn"
                       onClick={() => router.push(step.href)}
-                      style={{ ...S.stepBtn, background: `linear-gradient(135deg, ${step.color} 0%, ${step.color}BB 100%)` }}
+                      style={{
+                        ...S.stepBtn,
+                        background: `linear-gradient(135deg, ${step.color} 0%, ${step.color}BB 100%)`,
+                      }}
                     >
                       🚀 {step.action}
                     </button>
@@ -758,7 +894,9 @@ export default function WelcomePage() {
                     </div>
                     <div style={S.navLabel}>{n.label}</div>
                     <div style={S.navDesc}>{n.desc}</div>
-                    <div style={{ marginTop: 12, fontSize: 12, color: n.color, fontWeight: 700 }}>Open →</div>
+                    <div style={{ marginTop: 12, fontSize: 12, color: n.color, fontWeight: 700 }}>
+                      Open →
+                    </div>
                   </button>
                 ))}
               </div>
@@ -784,7 +922,7 @@ export default function WelcomePage() {
               <div style={S.footerInner}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                   <div style={S.footerLogo}>R&K</div>
-                  <span style={{ fontSize: 13, color: "rgba(255,255,255,0.45)", fontWeight: 700 }}>
+                  <span style={{ fontSize: 13, color: "rgba(255,255,255,0.62)", fontWeight: 700 }}>
                     AI-Powered Analytics Platform
                   </span>
                 </div>
@@ -804,7 +942,8 @@ export default function WelcomePage() {
 const S: Record<string, React.CSSProperties> = {
   page: {
     minHeight: "100vh",
-    background: "radial-gradient(ellipse 1200px 700px at 50% 0%, rgba(79,70,229,0.18), transparent 65%), #070D1A",
+    background:
+      "radial-gradient(ellipse 1200px 700px at 50% 0%, rgba(79,70,229,0.18), transparent 65%), #070D1A",
     color: "#E5E7EB",
     overflowX: "hidden",
   },
@@ -861,7 +1000,7 @@ const S: Record<string, React.CSSProperties> = {
     border: "1px solid rgba(99,102,241,0.25)",
     fontSize: 13,
     fontWeight: 700,
-    color: "rgba(255,255,255,0.85)",
+    color: "rgba(255,255,255,0.88)",
     maxWidth: 200,
     overflow: "hidden",
     textOverflow: "ellipsis",
@@ -884,7 +1023,7 @@ const S: Record<string, React.CSSProperties> = {
     border: "1px solid rgba(99,102,241,0.30)",
     fontSize: 13,
     fontWeight: 700,
-    color: "rgba(200,200,255,0.85)",
+    color: "rgba(210,210,255,0.90)",
     marginBottom: 24,
     display: "inline-block",
   },
@@ -893,12 +1032,13 @@ const S: Record<string, React.CSSProperties> = {
     fontWeight: 900,
     color: "#fff",
     margin: "0 0 18px",
-    lineHeight: 1.1,
-    fontFamily: "'Syne', sans-serif",
+    lineHeight: 1.08,
+    letterSpacing: "-0.02em",
+    fontFamily: "'Inter', system-ui, sans-serif",
   },
   heroSub: {
     fontSize: 18,
-    color: "rgba(255,255,255,0.62)",
+    color: "rgba(255,255,255,0.70)", // ↑ contrast
     lineHeight: 1.7,
     maxWidth: 560,
     margin: "0 0 36px",
@@ -911,7 +1051,8 @@ const S: Record<string, React.CSSProperties> = {
     border: "1px solid rgba(255,255,255,0.1)",
     borderRadius: 20,
     overflow: "hidden",
-    boxShadow: "0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(99,102,241,0.1)",
+    boxShadow:
+      "0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(99,102,241,0.1)",
   },
   dashPreviewHeader: {
     display: "flex",
@@ -928,7 +1069,7 @@ const S: Record<string, React.CSSProperties> = {
     fontSize: 12,
     fontWeight: 800,
     letterSpacing: "0.15em",
-    color: "rgba(99,102,241,0.8)",
+    color: "rgba(99,102,241,0.85)",
     textAlign: "center",
     marginBottom: 12,
   },
@@ -938,13 +1079,14 @@ const S: Record<string, React.CSSProperties> = {
     color: "#fff",
     textAlign: "center",
     margin: "0 0 12px",
-    fontFamily: "'Syne', sans-serif",
+    letterSpacing: "-0.02em",
+    fontFamily: "'Inter', system-ui, sans-serif",
   },
   sectionSub: {
     fontSize: 16,
-    color: "rgba(255,255,255,0.5)",
+    color: "rgba(255,255,255,0.68)", // ↑ contrast
     textAlign: "center",
-    maxWidth: 500,
+    maxWidth: 520,
     margin: "0 auto 48px",
   },
   featureGrid: {
@@ -969,7 +1111,12 @@ const S: Record<string, React.CSSProperties> = {
     flexShrink: 0,
   },
   featureTitle: { fontSize: 18, fontWeight: 800, color: "#fff" },
-  featureDesc: { fontSize: 14, color: "rgba(255,255,255,0.58)", lineHeight: 1.65, margin: "0 0 14px" },
+  featureDesc: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.68)", // ↑ contrast
+    lineHeight: 1.65,
+    margin: "0 0 14px",
+  },
   featurePreview: {
     padding: "14px 16px",
     borderRadius: 12,
@@ -986,7 +1133,11 @@ const S: Record<string, React.CSSProperties> = {
     alignItems: "center",
     gap: 12,
   },
-  nextHint: { fontSize: 15, color: "rgba(255,255,255,0.45)", fontWeight: 600 },
+  nextHint: {
+    fontSize: 15,
+    color: "rgba(255,255,255,0.66)", // ↑ contrast
+    fontWeight: 600,
+  },
   nextBtn: {
     display: "flex",
     alignItems: "center",
@@ -1000,7 +1151,8 @@ const S: Record<string, React.CSSProperties> = {
     cursor: "pointer",
     boxShadow: "0 14px 40px rgba(99,102,241,0.45)",
     transition: "all 0.25s ease",
-    fontFamily: "'Syne', sans-serif",
+    fontFamily: "'Inter', system-ui, sans-serif",
+    letterSpacing: "-0.01em",
   },
 
   backBtn: {
@@ -1008,7 +1160,7 @@ const S: Record<string, React.CSSProperties> = {
     borderRadius: 10,
     border: "1px solid rgba(255,255,255,0.15)",
     background: "rgba(255,255,255,0.06)",
-    color: "rgba(255,255,255,0.75)",
+    color: "rgba(255,255,255,0.82)", // ↑ contrast
     fontSize: 14,
     fontWeight: 700,
     cursor: "pointer",
@@ -1037,7 +1189,13 @@ const S: Record<string, React.CSSProperties> = {
     letterSpacing: "0.05em",
   },
   stepTitle: { fontSize: 20, fontWeight: 800, color: "#fff", marginBottom: 10 },
-  stepDesc: { fontSize: 14, color: "rgba(255,255,255,0.58)", lineHeight: 1.65, flex: 1, margin: "0 0 24px" },
+  stepDesc: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.68)", // ↑ contrast
+    lineHeight: 1.65,
+    flex: 1,
+    margin: "0 0 24px",
+  },
   stepBtn: {
     padding: "13px 22px",
     borderRadius: 12,
@@ -1077,19 +1235,27 @@ const S: Record<string, React.CSSProperties> = {
     justifyContent: "center",
   },
   navLabel: { fontSize: 16, fontWeight: 800, color: "#fff", marginBottom: 6 },
-  navDesc: { fontSize: 12, color: "rgba(255,255,255,0.50)", lineHeight: 1.5 },
+  navDesc: { fontSize: 12, color: "rgba(255,255,255,0.68)", lineHeight: 1.5 }, // ↑ contrast
 
   ctaSection: { maxWidth: 780, margin: "0 auto", padding: "20px 24px 60px" },
   ctaCard: {
-    background: "linear-gradient(135deg, rgba(99,102,241,0.18), rgba(236,72,153,0.12))",
+    background:
+      "linear-gradient(135deg, rgba(99,102,241,0.18), rgba(236,72,153,0.12))",
     border: "1px solid rgba(255,255,255,0.12)",
     borderRadius: 28,
     padding: "56px 40px",
     textAlign: "center",
     boxShadow: "0 30px 80px rgba(99,102,241,0.2)",
   },
-  ctaTitle: { fontSize: 34, fontWeight: 900, color: "#fff", margin: "0 0 14px", fontFamily: "'Syne', sans-serif" },
-  ctaDesc: { fontSize: 16, color: "rgba(255,255,255,0.6)", margin: "0 0 36px" },
+  ctaTitle: {
+    fontSize: 34,
+    fontWeight: 900,
+    color: "#fff",
+    margin: "0 0 14px",
+    letterSpacing: "-0.02em",
+    fontFamily: "'Inter', system-ui, sans-serif",
+  },
+  ctaDesc: { fontSize: 16, color: "rgba(255,255,255,0.70)", margin: "0 0 36px" }, // ↑ contrast
   ctaBtns: { display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" },
   ctaPrimary: {
     padding: "15px 36px",
