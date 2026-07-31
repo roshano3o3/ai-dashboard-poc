@@ -1255,7 +1255,7 @@ const S: Record<string, React.CSSProperties> = {
     letterSpacing: "-0.02em",
     fontFamily: "'Inter', system-ui, sans-serif",
   },
-  ctaDesc: { fontSize: 16, color: "rgba(255,255,255,0.70)", margin: "0 0 36px" }, // ↑ contrast
+  ctaDesc: { fontSize: 18, color: "rgba(255,255,255,0.70)", margin: "0 0 36px" }, // ↑ contrast
   ctaBtns: { display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" },
   ctaPrimary: {
     padding: "15px 36px",

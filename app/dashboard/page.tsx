@@ -15,7 +15,7 @@ import ExportButton from "./ExportButton";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
-const GROQ_API_KEY = process.env.NEXT_PUBLIC_GROQ_API_KEY || "";
+// ✅ GROQ FIX: key is now read inside callAI() at call time, not at module load
 const supabase = supabaseUrl && supabaseAnonKey ? createClient(supabaseUrl, supabaseAnonKey) : null;
 
 const COLORS = ["#818CF8","#34D399","#FB923C","#F472B6","#38BDF8","#A78BFA","#FBBF24","#4ADE80"];
@@ -217,15 +217,24 @@ export default function DashboardPage() {
 
   const handleLogout=async()=>{ if(!supabase) return; await supabase.auth.signOut(); router.push("/auth"); };
 
+  // ✅ GROQ FIX: key is read at call time so Next.js always picks it up correctly
   const callAI=async(q:string)=>{
-    if(!GROQ_API_KEY) return "⚠️ GROQ key missing.";
+    const groqKey = process.env.NEXT_PUBLIC_GROQ_API_KEY || "";
+    if(!groqKey){
+      pushToast("⚠️ GROQ API key missing. Add NEXT_PUBLIC_GROQ_API_KEY to .env.local and restart.","error");
+      return "⚠️ GROQ API key is missing.\n\nTo fix this:\n1. Open your .env.local file\n2. Add: NEXT_PUBLIC_GROQ_API_KEY=your_key_here\n3. Restart your dev server (npm run dev)\n\nGet a free key at: https://console.groq.com";
+    }
     try{
       let ctx="";
       if(selectedDataset&&dashboardData&&allData.length>0){ const dr=allData.filter(r=>r.dataset_name===selectedDataset); const sd=dr.slice(0,10).map(r=>r.row_data); ctx=`\nDATASET: "${selectedDataset}"\nTotal: ${dr.length}\nSAMPLE: ${JSON.stringify(sd,null,2)}\n`; }
-      const res=await fetch("https://api.groq.com/openai/v1/chat/completions",{method:"POST",headers:{Authorization:`Bearer ${GROQ_API_KEY}`,"Content-Type":"application/json"},body:JSON.stringify({model:"llama-3.3-70b-versatile",messages:[{role:"system",content:`You are a data analyst.\n\n${ctx}`},{role:"user",content:q}],max_tokens:700,temperature:0.7})});
-      if(!res.ok) return "⚠️ AI unavailable.";
+      const res=await fetch("https://api.groq.com/openai/v1/chat/completions",{method:"POST",headers:{Authorization:`Bearer ${groqKey}`,"Content-Type":"application/json"},body:JSON.stringify({model:"llama-3.3-70b-versatile",messages:[{role:"system",content:`You are a data analyst.\n\n${ctx}`},{role:"user",content:q}],max_tokens:700,temperature:0.7})});
+      if(!res.ok){
+        const errText=await res.text();
+        console.error("GROQ error:",errText);
+        return `⚠️ AI request failed (${res.status}). Please check your GROQ API key and quota.`;
+      }
       const d=await res.json(); return d.choices?.[0]?.message?.content||"No response.";
-    }catch(e){console.error(e);return "⚠️ Error.";}
+    }catch(e){console.error(e);return "⚠️ Network error contacting AI. Please check your connection.";}
   };
 
   const handleSend=async()=>{
@@ -233,7 +242,7 @@ export default function DashboardPage() {
     const q=input.trim(); setInput(""); setChatLoading(true);
     setMessages(p=>[...p,{role:"user",content:q,time:new Date().toLocaleTimeString()}]);
     const ai=await callAI(q);
-    setMessages(p=>[...p,{role:"assistant",content:ai,time:new Date().toLocaleTimeString()}]);
+    setMessages(p=>[...p,{role:"assistant",content:ai||"No response.",time:new Date().toLocaleTimeString()}]);
     setChatLoading(false);
   };
 
@@ -254,8 +263,8 @@ export default function DashboardPage() {
     <section style={C.section}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
         <button onClick={onToggle} style={{display:"flex",alignItems:"center",gap:10,border:"none",background:"transparent",color:"#fff",cursor:"pointer",padding:0}}>
-          <span style={{fontSize:13,opacity:0.6,fontFamily:"monospace"}}>{isCollapsed?"▸":"▾"}</span>
-          <span style={{fontSize:14,fontWeight:800,color:"rgba(255,255,255,0.92)",letterSpacing:0.2}}>{title}</span>
+          <span style={{fontSize:16,opacity:0.6,fontFamily:"monospace"}}>{isCollapsed?"▸":"▾"}</span>
+          <span style={{fontSize:18,fontWeight:800,color:"rgba(255,255,255,0.92)",letterSpacing:0.2}}>{title}</span>
         </button>
         <div style={{display:"flex",alignItems:"center",gap:10}}>{right}</div>
       </div>
@@ -316,8 +325,8 @@ export default function DashboardPage() {
         <div style={{display:"flex",alignItems:"center",gap:12}}>
           <div style={C.logo}>R&K</div>
           <div>
-            <div style={{fontSize:14,fontWeight:900,color:"#fff",letterSpacing:-0.2}}>R&K Analytics</div>
-            <div style={{fontSize:11,color:"rgba(255,255,255,0.40)",marginTop:1}}>{userEmail}</div>
+            <div style={{fontSize:18,fontWeight:900,color:"#fff",letterSpacing:-0.2}}>R&K Analytics</div>
+            <div style={{fontSize:14,color:"rgba(255,255,255,0.40)",marginTop:1}}>{userEmail}</div>
           </div>
         </div>
 
@@ -332,15 +341,14 @@ export default function DashboardPage() {
             {label:"Branding", icon:"⚙️",onClick:()=>router.push("/branding")},
           ] as const).map(({label,icon,onClick})=>(
             <button key={label} onClick={onClick} style={C.navBtn}>
-              <span style={{fontSize:18}}>{icon}</span>
-              <span style={{fontSize:10,fontWeight:800,color:"rgba(255,255,255,0.65)",letterSpacing:0.3}}>{label}</span>
+              <span style={{fontSize:23}}>{icon}</span>
+              <span style={{fontSize:13,fontWeight:800,color:"rgba(255,255,255,0.65)",letterSpacing:0.3}}>{label}</span>
             </button>
           ))}
         </div>
 
         {/* Right — Export + actions */}
         <div style={{display:"flex",alignItems:"center",gap:8,justifyContent:"flex-end"}}>
-          {/* ✅ EXPORT BUTTON — added here */}
           <ExportButton
             selectedDataset={selectedDataset}
             allData={allData}
@@ -368,29 +376,29 @@ export default function DashboardPage() {
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"wrap"}}>
               <div style={{display:"flex",alignItems:"center",gap:14}}>
                 <div style={C.activeOrb}>
-                  <span style={{fontSize:22}}>🗂️</span>
+                  <span style={{fontSize:26}}>🗂️</span>
                   <div style={C.orbGlow}/>
                 </div>
                 <div>
-                  <div style={{fontSize:10,fontWeight:900,color:"rgba(129,140,248,0.70)",textTransform:"uppercase",letterSpacing:1.2,marginBottom:3}}>Active Dataset</div>
-                  <div style={{fontSize:17,fontWeight:900,color:"#fff",letterSpacing:-0.3}}>{selectedDataset||"None"}</div>
+                  <div style={{fontSize:13,fontWeight:900,color:"rgba(129,140,248,0.70)",textTransform:"uppercase",letterSpacing:1.2,marginBottom:3}}>Active Dataset</div>
+                  <div style={{fontSize:21,fontWeight:900,color:"#fff",letterSpacing:-0.3}}>{selectedDataset||"None"}</div>
                 </div>
               </div>
 
               <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
                 <div style={C.liveBadge}>
                   <span style={C.liveDot}/>
-                  <span style={{fontSize:10,fontWeight:900,letterSpacing:0.8}}>LIVE</span>
-                  <span style={{fontSize:10,color:"rgba(52,211,153,0.60)"}}>· {lastUpdate.toLocaleTimeString()}</span>
+                  <span style={{fontSize:13,fontWeight:900,letterSpacing:0.8}}>LIVE</span>
+                  <span style={{fontSize:13,color:"rgba(52,211,153,0.60)"}}>· {lastUpdate.toLocaleTimeString()}</span>
                 </div>
                 <div style={C.statOrb}>
-                  <span style={{fontSize:20,fontWeight:950,color:"#fff",lineHeight:1}}>{selFiltered.length}</span>
-                  <span style={{fontSize:9,color:"rgba(255,255,255,0.45)",fontWeight:900,textTransform:"uppercase",letterSpacing:0.6}}>records</span>
+                  <span style={{fontSize:22,fontWeight:950,color:"#fff",lineHeight:1}}>{selFiltered.length}</span>
+                  <span style={{fontSize:11,color:"rgba(255,255,255,0.45)",fontWeight:900,textTransform:"uppercase",letterSpacing:0.6}}>records</span>
                 </div>
                 <button onClick={()=>setDatasetPanelOpen(p=>!p)} style={C.datasetCountBtn}>
-                  <span style={{fontSize:24,fontWeight:950,color:"#818CF8",lineHeight:1}}>{availableDatasets.length}</span>
-                  <span style={{fontSize:9,color:"rgba(129,140,248,0.70)",fontWeight:900,textTransform:"uppercase",letterSpacing:0.6}}>datasets</span>
-                  <span style={{fontSize:11,color:"rgba(129,140,248,0.50)",marginTop:1}}>{datasetPanelOpen?"▲":"▼"}</span>
+                  <span style={{fontSize:26,fontWeight:950,color:"#818CF8",lineHeight:1}}>{availableDatasets.length}</span>
+                  <span style={{fontSize:11,color:"rgba(129,140,248,0.70)",fontWeight:900,textTransform:"uppercase",letterSpacing:0.6}}>datasets</span>
+                  <span style={{fontSize:13,color:"rgba(129,140,248,0.50)",marginTop:1}}>{datasetPanelOpen?"▲":"▼"}</span>
                 </button>
               </div>
             </div>
@@ -405,18 +413,18 @@ export default function DashboardPage() {
                   return(
                     <button key={ds} onClick={()=>switchDataset(ds)} onMouseEnter={()=>setHoveredDs(ds)} onMouseLeave={()=>setHoveredDs(null)}
                       style={{display:"flex",alignItems:"center",gap:10,padding:"12px 14px",borderRadius:14,border:`1px solid ${isActive?col+"66":"rgba(255,255,255,0.07)"}`,background:isActive?`linear-gradient(135deg,${col}18,${col}08)`:hoveredDs===ds?"rgba(255,255,255,0.04)":"transparent",cursor:"pointer",textAlign:"left",boxShadow:isActive?`0 0 18px ${glow}26,inset 0 1px 0 rgba(255,255,255,0.06)`:"none",transition:"all 0.2s"}}>
-                      <div style={{width:34,height:34,borderRadius:10,background:`${col}22`,border:`1px solid ${col}44`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>📁</div>
+                      <div style={{width:36,height:36,borderRadius:10,background:`${col}22`,border:`1px solid ${col}44`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>📁</div>
                       <div style={{flex:1,minWidth:0}}>
-                        <div style={{fontSize:12,fontWeight:900,color:"#fff",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{ds}</div>
-                        <div style={{fontSize:11,color:"rgba(255,255,255,0.45)",marginTop:2,fontWeight:700}}>{dsRows.length} records</div>
+                        <div style={{fontSize:14,fontWeight:900,color:"#fff",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{ds}</div>
+                        <div style={{fontSize:13,color:"rgba(255,255,255,0.45)",marginTop:2,fontWeight:700}}>{dsRows.length} records</div>
                       </div>
-                      {isActive&&<div style={{width:7,height:7,borderRadius:"50%",background:col,boxShadow:`0 0 8px ${glow}`,flexShrink:0}}/>}
+                      {isActive&&<div style={{width:8,height:8,borderRadius:"50%",background:col,boxShadow:`0 0 8px ${glow}`,flexShrink:0}}/>}
                     </button>
                   );
                 })}
                 <button onClick={()=>router.push("/upload")} style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:5,padding:"12px 14px",borderRadius:14,border:"1px dashed rgba(255,255,255,0.13)",background:"transparent",cursor:"pointer",color:"rgba(255,255,255,0.40)",transition:"all 0.2s"}}>
-                  <span style={{fontSize:22}}>＋</span>
-                  <span style={{fontSize:10,fontWeight:900,textTransform:"uppercase",letterSpacing:0.6}}>Add Dataset</span>
+                  <span style={{fontSize:24}}>＋</span>
+                  <span style={{fontSize:13,fontWeight:900,textTransform:"uppercase",letterSpacing:0.6}}>Add Dataset</span>
                 </button>
               </div>
             )}
@@ -424,17 +432,17 @@ export default function DashboardPage() {
 
           {/* Quick Start */}
           <Section title="⚡ Quick Start" isCollapsed={collapse.quickStart} onToggle={()=>setCollapse(p=>({...p,quickStart:!p.quickStart}))}
-            right={<div style={{display:"flex",alignItems:"center",gap:6,fontSize:11,color:"rgba(255,255,255,0.40)",fontWeight:800}}><span style={{width:6,height:6,borderRadius:"50%",background:"#34D399",display:"inline-block",boxShadow:"0 0 6px rgba(52,211,153,0.7)"}}/>Updated {lastUpdate.toLocaleTimeString()}</div>}>
+            right={<div style={{display:"flex",alignItems:"center",gap:6,fontSize:13,color:"rgba(255,255,255,0.40)",fontWeight:800}}><span style={{width:7,height:7,borderRadius:"50%",background:"#34D399",display:"inline-block",boxShadow:"0 0 6px rgba(52,211,153,0.7)"}}/>Updated {lastUpdate.toLocaleTimeString()}</div>}>
             <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10}}>
               {[
                 {n:"1) Choose a dataset",t:"Use the dataset command center above. See all available datasets at a glance.",btnLabel:"Got it",btnFn:()=>pushToast("Dataset switcher is above.","info"),primary:false},
                 {n:"2) Optional: Apply filters",t:"Filter to focus your insights (region, category, status…).",btnLabel:"Open Filters",btnFn:()=>{setCollapse(p=>({...p,filters:false}));pushToast("Filters expanded","info");},primary:false},
                 {n:"3) Ask the AI Copilot",t:'Ask: "What are the key insights?" or "Forecast next period."',btnLabel:"Open AI",btnFn:()=>{setChatOpen(true);pushToast("AI Assistant opened","success");if(guidedMode)setInput("What are the key insights from this dataset?");},primary:true},
               ].map(({n,t,btnLabel,btnFn,primary})=>(
-                <div key={n} style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:14,padding:14}}>
-                  <div style={{fontSize:12,fontWeight:900,color:"rgba(255,255,255,0.90)"}}>{n}</div>
-                  <div style={{marginTop:7,fontSize:12,lineHeight:1.5,color:"rgba(255,255,255,0.50)",fontWeight:600}}>{t}</div>
-                  <button style={primary?C.btnPrimary:C.btnGhost} onClick={btnFn}>{btnLabel}</button>
+                <div key={n} style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:14,padding:16}}>
+                  <div style={{fontSize:15,fontWeight:900,color:"rgba(255,255,255,0.90)"}}>{n}</div>
+                  <div style={{marginTop:7,fontSize:14,lineHeight:1.5,color:"rgba(255,255,255,0.50)",fontWeight:600}}>{t}</div>
+                  <button style={{...(primary?C.btnPrimary:C.btnGhost),marginTop:12}} onClick={btnFn}>{btnLabel}</button>
                 </div>
               ))}
             </div>
@@ -443,12 +451,12 @@ export default function DashboardPage() {
           {/* Filters */}
           {!!Object.keys(availableFilters).length&&(
             <Section title={`🎛️ Filters${Object.keys(filters).length?` (${Object.keys(filters).length} active)`:""}`} isCollapsed={collapse.filters&&guidedMode} onToggle={()=>setCollapse(p=>({...p,filters:!p.filters}))}
-              right={Object.keys(filters).length>0?<button onClick={clearAllFilters} style={{padding:"6px 12px",borderRadius:9,border:"1px solid rgba(248,113,113,0.30)",background:"rgba(248,113,113,0.10)",color:"#FCA5A5",cursor:"pointer",fontSize:11,fontWeight:900}}>Clear All</button>:<span style={{fontSize:11,color:"rgba(255,255,255,0.35)",fontWeight:700}}>Tip: start with 1 filter</span>}>
+              right={Object.keys(filters).length>0?<button onClick={clearAllFilters} style={{padding:"7px 14px",borderRadius:9,border:"1px solid rgba(248,113,113,0.30)",background:"rgba(248,113,113,0.10)",color:"#FCA5A5",cursor:"pointer",fontSize:13,fontWeight:900}}>Clear All</button>:<span style={{fontSize:13,color:"rgba(255,255,255,0.35)",fontWeight:700}}>Tip: start with 1 filter</span>}>
               <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:12}}>
                 {Object.keys(availableFilters).map(col=>(
                   <div key={col}>
-                    <div style={{fontSize:10,fontWeight:900,color:"rgba(129,140,248,0.70)",marginBottom:6,textTransform:"uppercase",letterSpacing:0.8}}>{col}</div>
-                    <select value={filters[col]||"All"} onChange={e=>handleFilterChange(col,e.target.value)} style={{width:"100%",padding:"10px 12px",borderRadius:10,border:"1px solid rgba(255,255,255,0.10)",background:"rgba(255,255,255,0.05)",color:"#fff",fontWeight:700,outline:"none",cursor:"pointer",fontSize:13}}>
+                    <div style={{fontSize:13,fontWeight:900,color:"rgba(129,140,248,0.70)",marginBottom:6,textTransform:"uppercase",letterSpacing:0.8}}>{col}</div>
+                    <select value={filters[col]||"All"} onChange={e=>handleFilterChange(col,e.target.value)} style={{width:"100%",padding:"11px 13px",borderRadius:10,border:"1px solid rgba(255,255,255,0.10)",background:"rgba(255,255,255,0.05)",color:"#fff",fontWeight:700,outline:"none",cursor:"pointer",fontSize:14}}>
                       <option value="All" style={{color:"#0B1220",background:"#fff"}}>All</option>
                       {availableFilters[col].map(val=><option key={val} value={val} style={{color:"#0B1220",background:"#fff"}}>{val}</option>)}
                     </select>
@@ -464,18 +472,18 @@ export default function DashboardPage() {
               <SectionHeader title="Executive Brief" subtitle="Takeaway, risk, and next action (boardroom ready)"/>
               <ExecutiveBrief executive={dashboardData.executive}/>
               <CopilotChips onPick={q=>{setChatOpen(true);setInput(q);pushToast("Prompt loaded in AI","success");}}/>
-              <SectionHeader title="Key Metrics" subtitle="Top KPIs computed from your dataset" right={<span style={{fontSize:11,color:"rgba(255,255,255,0.35)",fontWeight:700}}>Auto-selected</span>}/>
+              <SectionHeader title="Key Metrics" subtitle="Top KPIs computed from your dataset" right={<span style={{fontSize:13,color:"rgba(255,255,255,0.35)",fontWeight:700}}>Auto-selected</span>}/>
               <KpiGrid kpis={dashboardData.kpis.slice(0,4)}/>
 
               {dashboardData.charts?.[0]&&(
                 <SpotlightCard title="Spotlight" subtitle={dashboardData.charts[0].subtitle} badge="Auto-selected #1 chart">
-                  <div style={{height:300,borderRadius:12,background:"rgba(255,255,255,0.02)",position:"relative",padding:8}}>
+                  <div style={{height:320,borderRadius:12,background:"rgba(255,255,255,0.02)",position:"relative",padding:8}}>
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie data={dashboardData.charts[0].data} cx="50%" cy="50%" innerRadius={88} outerRadius={132} paddingAngle={2} dataKey="value">
                           {dashboardData.charts[0].data.map((_,i)=><Cell key={i} fill={COLORS[i%COLORS.length]}/>)}
                         </Pie>
-                        <Tooltip contentStyle={{background:"rgba(10,14,30,0.98)",border:"1px solid rgba(129,140,248,0.25)",borderRadius:12,color:"#fff",fontSize:13,fontWeight:800}}/>
+                        <Tooltip contentStyle={{background:"rgba(10,14,30,0.98)",border:"1px solid rgba(129,140,248,0.25)",borderRadius:12,color:"#fff",fontSize:14,fontWeight:800}}/>
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
@@ -484,7 +492,7 @@ export default function DashboardPage() {
 
               {/* Visualizations */}
               <Section title="📊 Visualizations" isCollapsed={collapse.viz&&guidedMode} onToggle={()=>setCollapse(p=>({...p,viz:!p.viz}))}
-                right={<span style={{fontSize:11,color:"rgba(255,255,255,0.35)",fontWeight:700}}>Switch type: 🍩 📊 📈 🥧</span>}>
+                right={<span style={{fontSize:13,color:"rgba(255,255,255,0.35)",fontWeight:700}}>Switch type: 🍩 📊 📈 🥧</span>}>
                 <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:14}}>
                   {dashboardData.charts.map((chart,ci)=>{
                     const ct=chartTypes[chart.id]||chart.type;
@@ -495,46 +503,46 @@ export default function DashboardPage() {
                     const accentCol=COLORS[ci%COLORS.length];
                     const accentGlow=GLOW[ci%GLOW.length];
                     return(
-                      <div key={chart.id} style={{background:"rgba(10,14,30,0.80)",border:`1px solid rgba(255,255,255,0.07)`,borderRadius:18,padding:18,boxShadow:`0 0 0 1px rgba(255,255,255,0.03) inset`}}>
-                        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}}>
+                      <div key={chart.id} style={{background:"rgba(10,14,30,0.80)",border:`1px solid rgba(255,255,255,0.07)`,borderRadius:18,padding:20,boxShadow:`0 0 0 1px rgba(255,255,255,0.03) inset`}}>
+                        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12}}>
                           <div>
-                            <div style={{fontSize:14,fontWeight:900,color:"#fff",letterSpacing:-0.2}}>{chart.title}</div>
-                            <div style={{fontSize:11,color:"rgba(255,255,255,0.45)",marginTop:3}}>{chart.subtitle}</div>
+                            <div style={{fontSize:16,fontWeight:900,color:"#fff",letterSpacing:-0.2}}>{chart.title}</div>
+                            <div style={{fontSize:13,color:"rgba(255,255,255,0.45)",marginTop:3}}>{chart.subtitle}</div>
                           </div>
                           <div style={{display:"flex",gap:5}}>
                             {([{t:"donut",i:"🍩"},{t:"bar",i:"📊"},{t:"line",i:"📈"},{t:"pie",i:"🥧"}] as const).map(({t,i})=>(
-                              <button key={t} onClick={()=>setChartTypes(p=>({...p,[chart.id]:t}))} style={{padding:"5px 9px",borderRadius:8,border:`1px solid ${ct===t?accentCol+"55":"rgba(255,255,255,0.09)"}`,background:ct===t?`${accentCol}18`:"transparent",cursor:"pointer",fontSize:12,color:ct===t?accentCol:"rgba(255,255,255,0.45)",fontWeight:900,transition:"all 0.15s"}}>{i}</button>
+                              <button key={t} onClick={()=>setChartTypes(p=>({...p,[chart.id]:t}))} style={{padding:"6px 10px",borderRadius:8,border:`1px solid ${ct===t?accentCol+"55":"rgba(255,255,255,0.09)"}`,background:ct===t?`${accentCol}18`:"transparent",cursor:"pointer",fontSize:14,color:ct===t?accentCol:"rgba(255,255,255,0.45)",fontWeight:900,transition:"all 0.15s"}}>{i}</button>
                             ))}
                           </div>
                         </div>
 
-                        <div style={{margin:"8px 0",padding:"9px 13px",borderRadius:10,background:`${accentCol}10`,borderLeft:`3px solid ${accentCol}`,color:"rgba(255,255,255,0.85)",fontSize:12,fontWeight:700,lineHeight:1.4}}>
+                        <div style={{margin:"8px 0",padding:"10px 14px",borderRadius:10,background:`${accentCol}10`,borderLeft:`3px solid ${accentCol}`,color:"rgba(255,255,255,0.85)",fontSize:14,fontWeight:700,lineHeight:1.4}}>
                           🔍 {chart.insight}
                         </div>
 
-                        <div style={{height:260,borderRadius:12,background:"rgba(255,255,255,0.02)",position:"relative",padding:6}}>
+                        <div style={{height:280,borderRadius:12,background:"rgba(255,255,255,0.02)",position:"relative",padding:6}}>
                           <ResponsiveContainer width="100%" height="100%">
                             {ct==="donut"||ct==="pie"?(
                               <PieChart>
-                                <Pie data={sorted} cx="50%" cy="50%" innerRadius={ct==="donut"?70:0} outerRadius={105} paddingAngle={2} dataKey="value" label={({percent})=>percent>0.08?`${(percent*100).toFixed(0)}%`:""} labelLine={false}>
+                                <Pie data={sorted} cx="50%" cy="50%" innerRadius={ct==="donut"?70:0} outerRadius={108} paddingAngle={2} dataKey="value" label={({percent})=>percent>0.08?`${(percent*100).toFixed(0)}%`:""} labelLine={false}>
                                   {sorted.map((_,i)=><Cell key={i} fill={COLORS[i%COLORS.length]}/>)}
                                 </Pie>
-                                <Tooltip contentStyle={{background:"rgba(10,14,30,0.98)",border:`1px solid ${accentCol}33`,borderRadius:12,color:"#fff",fontSize:12,fontWeight:800}} formatter={(v:any,n:any)=>[`${v} (${pct(v,total)})`,n]}/>
+                                <Tooltip contentStyle={{background:"rgba(10,14,30,0.98)",border:`1px solid ${accentCol}33`,borderRadius:12,color:"#fff",fontSize:14,fontWeight:800}} formatter={(v:any,n:any)=>[`${v} (${pct(v,total)})`,n]}/>
                               </PieChart>
                             ):ct==="line"?(
                               <LineChart data={sorted}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false}/>
-                                <XAxis dataKey="name" tick={{fontSize:10,fill:"rgba(255,255,255,0.45)"}} axisLine={{stroke:"rgba(255,255,255,0.06)"}} tickLine={false}/>
-                                <YAxis tick={{fontSize:10,fill:"rgba(255,255,255,0.45)"}} axisLine={false} tickLine={false}/>
-                                <Tooltip contentStyle={{background:"rgba(10,14,30,0.98)",border:`1px solid ${accentCol}33`,borderRadius:12,color:"#fff",fontSize:12,fontWeight:800}} formatter={(v:any)=>[`${v} (${pct(v,total)})`]}/>
+                                <XAxis dataKey="name" tick={{fontSize:12,fill:"rgba(255,255,255,0.45)"}} axisLine={{stroke:"rgba(255,255,255,0.06)"}} tickLine={false}/>
+                                <YAxis tick={{fontSize:12,fill:"rgba(255,255,255,0.45)"}} axisLine={false} tickLine={false}/>
+                                <Tooltip contentStyle={{background:"rgba(10,14,30,0.98)",border:`1px solid ${accentCol}33`,borderRadius:12,color:"#fff",fontSize:14,fontWeight:800}} formatter={(v:any)=>[`${v} (${pct(v,total)})`]}/>
                                 <Line type="monotone" dataKey="value" stroke={accentCol} strokeWidth={2.5} dot={{r:4,fill:accentCol,strokeWidth:2,stroke:"rgba(10,14,30,0.8)"}} activeDot={{r:6,boxShadow:`0 0 10px ${accentGlow}`}}/>
                               </LineChart>
                             ):(
                               <BarChart data={sorted} barSize={28}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false}/>
-                                <XAxis dataKey="name" tick={{fontSize:10,fill:"rgba(255,255,255,0.45)"}} axisLine={{stroke:"rgba(255,255,255,0.06)"}} tickLine={false}/>
-                                <YAxis tick={{fontSize:10,fill:"rgba(255,255,255,0.45)"}} axisLine={false} tickLine={false}/>
-                                <Tooltip contentStyle={{background:"rgba(10,14,30,0.98)",border:`1px solid ${accentCol}33`,borderRadius:12,color:"#fff",fontSize:12,fontWeight:800}} formatter={(v:any)=>[`${v} (${pct(v,total)})`]} cursor={{fill:"rgba(255,255,255,0.03)"}}/>
+                                <XAxis dataKey="name" tick={{fontSize:12,fill:"rgba(255,255,255,0.45)"}} axisLine={{stroke:"rgba(255,255,255,0.06)"}} tickLine={false}/>
+                                <YAxis tick={{fontSize:12,fill:"rgba(255,255,255,0.45)"}} axisLine={false} tickLine={false}/>
+                                <Tooltip contentStyle={{background:"rgba(10,14,30,0.98)",border:`1px solid ${accentCol}33`,borderRadius:12,color:"#fff",fontSize:14,fontWeight:800}} formatter={(v:any)=>[`${v} (${pct(v,total)})`]} cursor={{fill:"rgba(255,255,255,0.03)"}}/>
                                 <Bar dataKey="value" radius={[8,8,0,0]}>
                                   {sorted.map((_,i)=><Cell key={i} fill={COLORS[i%COLORS.length]}/>)}
                                 </Bar>
@@ -543,37 +551,37 @@ export default function DashboardPage() {
                           </ResponsiveContainer>
                           {(ct==="donut"||ct==="pie")&&top&&(
                             <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",pointerEvents:"none",flexDirection:"column",gap:3}}>
-                              <div style={{fontSize:10,color:"rgba(255,255,255,0.50)",fontWeight:900,textTransform:"uppercase",letterSpacing:0.6}}>Top</div>
-                              <div style={{fontSize:14,fontWeight:950,color:"#fff"}}>{safeLabel(top.name,16)}</div>
-                              <div style={{fontSize:12,fontWeight:800,color:accentCol}}>{pct(top.value,total)}</div>
+                              <div style={{fontSize:13,color:"rgba(255,255,255,0.50)",fontWeight:900,textTransform:"uppercase",letterSpacing:0.6}}>Top</div>
+                              <div style={{fontSize:16,fontWeight:950,color:"#fff"}}>{safeLabel(top.name,16)}</div>
+                              <div style={{fontSize:14,fontWeight:800,color:accentCol}}>{pct(top.value,total)}</div>
                             </div>
                           )}
                         </div>
 
-                        <div style={{display:"flex",flexWrap:"wrap",gap:"5px 10px",marginTop:10,padding:"9px 11px",borderRadius:10,background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.05)"}}>
+                        <div style={{display:"flex",flexWrap:"wrap",gap:"6px 12px",marginTop:12,padding:"10px 12px",borderRadius:10,background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.05)"}}>
                           {sorted.slice(0,6).map((item,i)=>(
                             <div key={i} style={{display:"flex",alignItems:"center",gap:5}}>
-                              <div style={{width:9,height:9,borderRadius:2.5,background:COLORS[i%COLORS.length],flexShrink:0}}/>
-                              <span style={{fontSize:11,fontWeight:700,color:"rgba(255,255,255,0.70)"}}>{safeLabel(item.name,12)}</span>
-                              <span style={{fontSize:11,color:"rgba(255,255,255,0.35)"}}>{pct(item.value,total)}</span>
+                              <div style={{width:10,height:10,borderRadius:3,background:COLORS[i%COLORS.length],flexShrink:0}}/>
+                              <span style={{fontSize:13,fontWeight:700,color:"rgba(255,255,255,0.70)"}}>{safeLabel(item.name,12)}</span>
+                              <span style={{fontSize:13,color:"rgba(255,255,255,0.35)"}}>{pct(item.value,total)}</span>
                             </div>
                           ))}
                         </div>
 
-                        <div style={{marginTop:12}}>
-                          <div style={{fontSize:10,fontWeight:900,color:"rgba(255,255,255,0.30)",letterSpacing:1,marginBottom:8,textTransform:"uppercase"}}>TOP 3</div>
+                        <div style={{marginTop:14}}>
+                          <div style={{fontSize:12,fontWeight:900,color:"rgba(255,255,255,0.30)",letterSpacing:1,marginBottom:8,textTransform:"uppercase"}}>TOP 3</div>
                           {top3.map((item,i)=>{
                             const medals=["🥇","🥈","🥉"];
                             const w=sorted[0].value>0?(item.value/sorted[0].value)*100:0;
                             return(
-                              <div key={i} style={{display:"flex",alignItems:"center",gap:8,marginBottom:7}}>
-                                <span style={{fontSize:15,width:20,flexShrink:0}}>{medals[i]}</span>
+                              <div key={i} style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+                                <span style={{fontSize:17,width:22,flexShrink:0}}>{medals[i]}</span>
                                 <div style={{flex:1,minWidth:0}}>
                                   <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
-                                    <span style={{fontSize:11,fontWeight:800,color:"rgba(255,255,255,0.80)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:"62%"}}>{safeLabel(item.name,15)}</span>
-                                    <span style={{fontSize:11,fontWeight:800,color:COLORS[i%COLORS.length]}}>{item.value} · {pct(item.value,total)}</span>
+                                    <span style={{fontSize:13,fontWeight:800,color:"rgba(255,255,255,0.80)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:"62%"}}>{safeLabel(item.name,15)}</span>
+                                    <span style={{fontSize:13,fontWeight:800,color:COLORS[i%COLORS.length]}}>{item.value} · {pct(item.value,total)}</span>
                                   </div>
-                                  <div style={{height:3,borderRadius:999,background:"rgba(255,255,255,0.06)",overflow:"hidden"}}>
+                                  <div style={{height:4,borderRadius:999,background:"rgba(255,255,255,0.06)",overflow:"hidden"}}>
                                     <div style={{height:"100%",width:`${w}%`,borderRadius:999,background:COLORS[i%COLORS.length],transition:"width 0.8s ease"}}/>
                                   </div>
                                 </div>
@@ -602,18 +610,18 @@ export default function DashboardPage() {
               borderRadius:"14px 0 0 14px", cursor:"pointer", zIndex:10,
               boxShadow:"-4px 0 20px rgba(129,140,248,0.15)",
             }}>
-              <span style={{fontSize:20}}>💬</span>
-              <span style={{fontSize:9,fontWeight:900,color:"rgba(129,140,248,0.90)",letterSpacing:1,textTransform:"uppercase",writingMode:"vertical-rl",transform:"rotate(180deg)"}}>AI Chat</span>
+              <span style={{fontSize:22}}>💬</span>
+              <span style={{fontSize:10,fontWeight:900,color:"rgba(129,140,248,0.90)",letterSpacing:1,textTransform:"uppercase",writingMode:"vertical-rl",transform:"rotate(180deg)"}}>AI Chat</span>
             </button>
           )}
 
           {chatOpen && (
           <div style={C.chatHead}>
             <div style={{flex:1,minWidth:0}}>
-              <div style={{fontSize:18,fontWeight:950,color:"#fff",letterSpacing:-0.3}}>🤖 AI Assistant</div>
-              <div style={{fontSize:13,color:"rgba(255,255,255,0.50)",marginTop:4,fontWeight:600}}>Ask questions about your data</div>
+              <div style={{fontSize:20,fontWeight:950,color:"#fff",letterSpacing:-0.3}}>🤖 AI Assistant</div>
+              <div style={{fontSize:14,color:"rgba(255,255,255,0.50)",marginTop:4,fontWeight:600}}>Ask questions about your data</div>
             </div>
-            <button onClick={()=>setChatOpen(false)} style={{width:42,height:42,borderRadius:12,border:"1px solid rgba(129,140,248,0.25)",background:"rgba(129,140,248,0.12)",color:"#fff",cursor:"pointer",fontSize:18,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>✕</button>
+            <button onClick={()=>setChatOpen(false)} style={{width:44,height:44,borderRadius:12,border:"1px solid rgba(129,140,248,0.25)",background:"rgba(129,140,248,0.12)",color:"#fff",cursor:"pointer",fontSize:18,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>✕</button>
           </div>
           )}
           {chatOpen&&(
@@ -621,9 +629,9 @@ export default function DashboardPage() {
               <div style={{flex:1,overflowY:"auto",padding:20}}>
                 {!messages.length?(
                   <div style={{padding:20,borderRadius:16,background:"rgba(129,140,248,0.06)",border:"1px solid rgba(129,140,248,0.14)",display:"flex",flexDirection:"column",gap:10}}>
-                    <div style={{fontSize:15,fontWeight:900,color:"rgba(255,255,255,0.85)"}}>💡 Try asking:</div>
+                    <div style={{fontSize:16,fontWeight:900,color:"rgba(255,255,255,0.85)"}}>💡 Try asking:</div>
                     {["What are the key insights?","Show me top performers","What risks should I watch?"].map(q=>(
-                      <button key={q} onClick={()=>setInput(q)} style={{padding:"13px 16px",borderRadius:12,border:"1px solid rgba(255,255,255,0.08)",background:"rgba(255,255,255,0.04)",color:"rgba(255,255,255,0.80)",fontWeight:700,cursor:"pointer",fontSize:13,textAlign:"left"}}>{q}</button>
+                      <button key={q} onClick={()=>setInput(q)} style={{padding:"14px 16px",borderRadius:12,border:"1px solid rgba(255,255,255,0.08)",background:"rgba(255,255,255,0.04)",color:"rgba(255,255,255,0.80)",fontWeight:700,cursor:"pointer",fontSize:15,textAlign:"left"}}>{q}</button>
                     ))}
                   </div>
                 ):(
@@ -631,8 +639,8 @@ export default function DashboardPage() {
                     {messages.map((m,idx)=>(
                       <div key={idx} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":"flex-start"}}>
                         <div style={{maxWidth:"88%",padding:"15px 18px",borderRadius:16,background:m.role==="user"?"linear-gradient(135deg,#818CF8,#F472B6)":"rgba(255,255,255,0.06)",boxShadow:m.role==="user"?"0 4px 16px rgba(129,140,248,0.30)":"none"}}>
-                          <div style={{whiteSpace:"pre-wrap",fontSize:14,color:"#fff",lineHeight:1.65,fontWeight:600}}>{m.content}</div>
-                          <div style={{marginTop:8,fontSize:11,color:"rgba(255,255,255,0.40)",fontWeight:700}}>{m.time}</div>
+                          <div style={{whiteSpace:"pre-wrap",fontSize:15,color:"#fff",lineHeight:1.65,fontWeight:600}}>{m.content}</div>
+                          <div style={{marginTop:8,fontSize:12,color:"rgba(255,255,255,0.40)",fontWeight:700}}>{m.time}</div>
                         </div>
                       </div>
                     ))}
@@ -641,8 +649,8 @@ export default function DashboardPage() {
                 )}
               </div>
               <div style={{padding:16,borderTop:"1px solid rgba(255,255,255,0.06)",background:"rgba(10,14,30,0.60)",display:"flex",gap:10}}>
-                <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();handleSend();}}} placeholder="Ask about your data…" style={{flex:1,padding:"13px 16px",borderRadius:13,border:"1px solid rgba(129,140,248,0.20)",background:"rgba(255,255,255,0.05)",color:"#fff",outline:"none",fontWeight:700,fontSize:14}}/>
-                <button onClick={handleSend} disabled={!input.trim()||chatLoading} style={{padding:"13px 22px",borderRadius:13,border:"none",cursor:"pointer",fontWeight:950,color:"#fff",background:"linear-gradient(135deg,#818CF8,#F472B6)",fontSize:14,opacity:!input.trim()||chatLoading?0.45:1,boxShadow:"0 4px 16px rgba(129,140,248,0.35)"}}>
+                <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();handleSend();}}} placeholder="Ask about your data…" style={{flex:1,padding:"14px 16px",borderRadius:13,border:"1px solid rgba(129,140,248,0.20)",background:"rgba(255,255,255,0.05)",color:"#fff",outline:"none",fontWeight:700,fontSize:15}}/>
+                <button onClick={handleSend} disabled={!input.trim()||chatLoading} style={{padding:"14px 24px",borderRadius:13,border:"none",cursor:"pointer",fontWeight:950,color:"#fff",background:"linear-gradient(135deg,#818CF8,#F472B6)",fontSize:15,opacity:!input.trim()||chatLoading?0.45:1,boxShadow:"0 4px 16px rgba(129,140,248,0.35)"}}>
                   {chatLoading?"…":"Send"}
                 </button>
               </div>
@@ -654,23 +662,23 @@ export default function DashboardPage() {
       {/* ── WELCOME MODAL ── */}
       {showWelcome&&(
         <div style={{position:"fixed",inset:0,zIndex:99999,background:"rgba(0,0,0,0.75)",backdropFilter:"blur(14px)",display:"flex",alignItems:"center",justifyContent:"center",padding:18}}>
-          <div style={{width:"min(900px,96vw)",borderRadius:24,border:"1px solid rgba(129,140,248,0.22)",background:"radial-gradient(ellipse 800px 400px at 20% 0%,rgba(129,140,248,0.18),transparent 60%),rgba(10,14,30,0.97)",boxShadow:"0 0 80px rgba(129,140,248,0.20),0 30px 90px rgba(0,0,0,0.60)",padding:24}}>
+          <div style={{width:"min(900px,96vw)",borderRadius:24,border:"1px solid rgba(129,140,248,0.22)",background:"radial-gradient(ellipse 800px 400px at 20% 0%,rgba(129,140,248,0.18),transparent 60%),rgba(10,14,30,0.97)",boxShadow:"0 0 80px rgba(129,140,248,0.20),0 30px 90px rgba(0,0,0,0.60)",padding:28}}>
             <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:12}}>
               <div>
-                <div style={{fontSize:22,fontWeight:950,color:"#fff",letterSpacing:-0.5}}>Welcome to R&K Analytics 🌌</div>
-                <div style={{marginTop:6,fontSize:14,color:"rgba(255,255,255,0.55)",fontWeight:600}}>Your AI-powered business intelligence cockpit</div>
+                <div style={{fontSize:24,fontWeight:950,color:"#fff",letterSpacing:-0.5}}>Welcome to R&K Analytics 🌌</div>
+                <div style={{marginTop:6,fontSize:16,color:"rgba(255,255,255,0.55)",fontWeight:600}}>Your AI-powered business intelligence cockpit</div>
               </div>
-              <button onClick={dismissWelcome} style={{width:42,height:42,borderRadius:12,border:"1px solid rgba(255,255,255,0.10)",background:"rgba(255,255,255,0.05)",color:"#fff",cursor:"pointer",fontWeight:950,fontSize:15}}>✕</button>
+              <button onClick={dismissWelcome} style={{width:44,height:44,borderRadius:12,border:"1px solid rgba(255,255,255,0.10)",background:"rgba(255,255,255,0.05)",color:"#fff",cursor:"pointer",fontWeight:950,fontSize:16}}>✕</button>
             </div>
-            <div style={{marginTop:16,display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10}}>
+            <div style={{marginTop:18,display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12}}>
               {[{title:"1) Start with Spotlight",text:"Your top insight is already selected. Use Filters to validate it."},{title:"2) Ask the Copilot",text:"Use quick prompts or ask anything in the AI panel on the right."},{title:"3) Export + Share",text:"Use the Export button (top right) for PDF/Excel/CSV reports."}].map(({title,text})=>(
-                <div key={title} style={{borderRadius:16,padding:14,border:"1px solid rgba(255,255,255,0.07)",background:"rgba(255,255,255,0.03)"}}>
-                  <div style={{fontSize:13,fontWeight:900,color:"#fff"}}>{title}</div>
-                  <div style={{marginTop:8,fontSize:12,lineHeight:1.5,color:"rgba(255,255,255,0.55)"}}>{text}</div>
+                <div key={title} style={{borderRadius:16,padding:18,border:"1px solid rgba(255,255,255,0.07)",background:"rgba(255,255,255,0.03)"}}>
+                  <div style={{fontSize:15,fontWeight:900,color:"#fff"}}>{title}</div>
+                  <div style={{marginTop:8,fontSize:14,lineHeight:1.5,color:"rgba(255,255,255,0.55)"}}>{text}</div>
                 </div>
               ))}
             </div>
-            <div style={{marginTop:16,display:"flex",gap:10,justifyContent:"flex-end",flexWrap:"wrap"}}>
+            <div style={{marginTop:18,display:"flex",gap:10,justifyContent:"flex-end",flexWrap:"wrap"}}>
               <button onClick={()=>{setChatOpen(true);setInput("Give me a board-ready executive summary of this dataset.");dismissWelcome();pushToast("AI prompt loaded","success");}} style={C.btnPrimary}>🚀 Generate Executive Summary</button>
               <button onClick={()=>{setCollapse(p=>({...p,filters:false}));dismissWelcome();pushToast("Filters opened","info");}} style={C.btnGhost}>🎛️ Open Filters</button>
               <button onClick={dismissWelcome} style={C.btnGhost}>✅ Got it</button>
@@ -682,7 +690,7 @@ export default function DashboardPage() {
       {/* ── TOASTS ── */}
       <div style={{position:"fixed",right:16,bottom:16,display:"flex",flexDirection:"column",gap:8,zIndex:200}}>
         {toasts.map(t=>(
-          <div key={t.id} style={{minWidth:240,padding:"11px 14px",borderRadius:12,background:"rgba(10,14,30,0.85)",backdropFilter:"blur(16px)",border:"1px solid rgba(255,255,255,0.08)",borderLeft:`4px solid ${t.kind==="success"?"#34D399":t.kind==="error"?"#F87171":"#818CF8"}`,color:"#fff",fontWeight:800,fontSize:13,boxShadow:"0 8px 24px rgba(0,0,0,0.35)"}}>{t.message}</div>
+          <div key={t.id} style={{minWidth:260,padding:"13px 16px",borderRadius:12,background:"rgba(10,14,30,0.85)",backdropFilter:"blur(16px)",border:"1px solid rgba(255,255,255,0.08)",borderLeft:`4px solid ${t.kind==="success"?"#34D399":t.kind==="error"?"#F87171":"#818CF8"}`,color:"#fff",fontWeight:800,fontSize:14,boxShadow:"0 8px 24px rgba(0,0,0,0.35)"}}>{t.message}</div>
         ))}
       </div>
     </div>
@@ -697,21 +705,21 @@ const BG=`
 `.replace(/\s+/g," ").trim();
 
 const C: Record<string, React.CSSProperties> = {
-  topbar: { position:"sticky",top:0,zIndex:50,padding:"12px 20px",display:"grid",gridTemplateColumns:"240px 1fr 360px",alignItems:"center",gap:16,background:"rgba(6,10,24,0.85)",backdropFilter:"blur(24px)",borderBottom:"1px solid rgba(129,140,248,0.13)",boxShadow:"0 1px 0 rgba(129,140,248,0.07)" },
-  logo: { width:44,height:44,borderRadius:14,background:"linear-gradient(135deg,#818CF8 0%,#F472B6 100%)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,fontWeight:950,color:"#fff",boxShadow:"0 0 24px rgba(129,140,248,0.45)",letterSpacing:-0.5 },
-  navBtn: { display:"flex",flexDirection:"column",alignItems:"center",gap:4,padding:"7px 12px",borderRadius:11,border:"1px solid rgba(255,255,255,0.06)",background:"rgba(255,255,255,0.03)",cursor:"pointer",transition:"all 0.15s" },
-  pill: { padding:"8px 13px",borderRadius:10,border:"1px solid rgba(255,255,255,0.10)",background:"rgba(255,255,255,0.05)",color:"rgba(255,255,255,0.70)",cursor:"pointer",fontSize:12,fontWeight:800 },
-  datasetHub: { background:"linear-gradient(135deg,rgba(10,14,30,0.92) 0%,rgba(20,16,56,0.88) 100%)",border:"1px solid rgba(129,140,248,0.18)",borderRadius:20,padding:18,boxShadow:"0 0 40px rgba(129,140,248,0.08),inset 0 1px 0 rgba(255,255,255,0.05)" },
-  activeOrb: { width:52,height:52,borderRadius:16,background:"rgba(129,140,248,0.15)",border:"1px solid rgba(129,140,248,0.28)",display:"flex",alignItems:"center",justifyContent:"center",position:"relative",boxShadow:"0 0 20px rgba(129,140,248,0.18)" },
+  topbar: { position:"sticky",top:0,zIndex:50,padding:"15px 25px",display:"grid",gridTemplateColumns:"300px 1fr 450px",alignItems:"center",gap:20,background:"rgba(6,10,24,0.85)",backdropFilter:"blur(24px)",borderBottom:"1px solid rgba(129,140,248,0.13)",boxShadow:"0 1px 0 rgba(129,140,248,0.07)" },
+  logo: { width:55,height:55,borderRadius:14,background:"linear-gradient(135deg,#818CF8 0%,#F472B6 100%)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,fontWeight:950,color:"#fff",boxShadow:"0 0 24px rgba(129,140,248,0.45)",letterSpacing:-0.5 },
+  navBtn: { display:"flex",flexDirection:"column",alignItems:"center",gap:5,padding:"9px 15px",borderRadius:11,border:"1px solid rgba(255,255,255,0.06)",background:"rgba(255,255,255,0.03)",cursor:"pointer",transition:"all 0.15s" },
+  pill: { padding:"10px 16px",borderRadius:10,border:"1px solid rgba(255,255,255,0.10)",background:"rgba(255,255,255,0.05)",color:"rgba(255,255,255,0.70)",cursor:"pointer",fontSize:15,fontWeight:800 },
+  datasetHub: { background:"linear-gradient(135deg,rgba(10,14,30,0.92) 0%,rgba(20,16,56,0.88) 100%)",border:"1px solid rgba(129,140,248,0.18)",borderRadius:20,padding:22,boxShadow:"0 0 40px rgba(129,140,248,0.08),inset 0 1px 0 rgba(255,255,255,0.05)" },
+  activeOrb: { width:65,height:65,borderRadius:16,background:"rgba(129,140,248,0.15)",border:"1px solid rgba(129,140,248,0.28)",display:"flex",alignItems:"center",justifyContent:"center",position:"relative",boxShadow:"0 0 20px rgba(129,140,248,0.18)" },
   orbGlow: { position:"absolute",inset:-1,borderRadius:16,background:"radial-gradient(circle at 30% 30%,rgba(129,140,248,0.25),transparent 60%)",pointerEvents:"none" },
-  liveBadge: { display:"flex",alignItems:"center",gap:6,padding:"7px 12px",borderRadius:999,background:"rgba(52,211,153,0.10)",border:"1px solid rgba(52,211,153,0.22)",color:"#6EE7B7",fontSize:10,fontWeight:900,letterSpacing:0.5 },
-  liveDot: { width:6,height:6,borderRadius:"50%",background:"#34D399",boxShadow:"0 0 7px rgba(52,211,153,0.80)",display:"inline-block" },
-  statOrb: { display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"9px 16px",borderRadius:14,background:"rgba(56,189,248,0.08)",border:"1px solid rgba(56,189,248,0.18)",minWidth:64,gap:2 },
-  datasetCountBtn: { display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"9px 16px",borderRadius:14,background:"rgba(129,140,248,0.12)",border:"1px solid rgba(129,140,248,0.30)",cursor:"pointer",minWidth:72,gap:1,boxShadow:"0 0 14px rgba(129,140,248,0.12)",transition:"all 0.2s" },
-  section: { background:"rgba(255,255,255,0.025)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:16,padding:16,backdropFilter:"blur(6px)" },
-  btnPrimary: { padding:"11px 16px",borderRadius:12,border:"none",background:"linear-gradient(135deg,#818CF8 0%,#F472B6 100%)",color:"#fff",cursor:"pointer",fontWeight:950,fontSize:13,boxShadow:"0 4px 14px rgba(129,140,248,0.35)" },
-  btnGhost:   { padding:"11px 16px",borderRadius:12,border:"1px solid rgba(255,255,255,0.10)",background:"rgba(255,255,255,0.05)",color:"rgba(255,255,255,0.75)",cursor:"pointer",fontWeight:800,fontSize:13 },
-  chatOpen:   { width:560,background:"linear-gradient(180deg,rgba(6,10,24,0.99) 0%,rgba(12,16,36,0.99) 100%)",borderLeft:"1px solid rgba(129,140,248,0.16)",display:"flex",flexDirection:"column",transition:"all 0.35s ease",boxShadow:"-12px 0 40px rgba(0,0,0,0.45)",flexShrink:0 },
+  liveBadge: { display:"flex",alignItems:"center",gap:6,padding:"9px 15px",borderRadius:999,background:"rgba(52,211,153,0.10)",border:"1px solid rgba(52,211,153,0.22)",color:"#6EE7B7",fontSize:13,fontWeight:900,letterSpacing:0.5 },
+  liveDot: { width:8,height:8,borderRadius:"50%",background:"#34D399",boxShadow:"0 0 7px rgba(52,211,153,0.80)",display:"inline-block" },
+  statOrb: { display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"11px 20px",borderRadius:14,background:"rgba(56,189,248,0.08)",border:"1px solid rgba(56,189,248,0.18)",minWidth:80,gap:2 },
+  datasetCountBtn: { display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"11px 20px",borderRadius:14,background:"rgba(129,140,248,0.12)",border:"1px solid rgba(129,140,248,0.30)",cursor:"pointer",minWidth:90,gap:1,boxShadow:"0 0 14px rgba(129,140,248,0.12)",transition:"all 0.2s" },
+  section: { background:"rgba(255,255,255,0.025)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:16,padding:20,backdropFilter:"blur(6px)" },
+  btnPrimary: { padding:"14px 20px",borderRadius:12,border:"none",background:"linear-gradient(135deg,#818CF8 0%,#F472B6 100%)",color:"#fff",cursor:"pointer",fontWeight:950,fontSize:16,boxShadow:"0 4px 14px rgba(129,140,248,0.35)" },
+  btnGhost:   { padding:"14px 20px",borderRadius:12,border:"1px solid rgba(255,255,255,0.10)",background:"rgba(255,255,255,0.05)",color:"rgba(255,255,255,0.75)",cursor:"pointer",fontWeight:800,fontSize:16 },
+  chatOpen:   { width:700,background:"linear-gradient(180deg,rgba(6,10,24,0.99) 0%,rgba(12,16,36,0.99) 100%)",borderLeft:"1px solid rgba(129,140,248,0.16)",display:"flex",flexDirection:"column",transition:"all 0.35s ease",boxShadow:"-12px 0 40px rgba(0,0,0,0.45)",flexShrink:0 },
   chatClosed: { width:0,background:"transparent",border:"none",display:"flex",flexDirection:"column",transition:"all 0.35s ease",position:"relative",overflow:"visible",flexShrink:0 },
-  chatHead:   { padding:"18px 18px 16px",borderBottom:"1px solid rgba(129,140,248,0.12)",background:"linear-gradient(135deg,rgba(129,140,248,0.12) 0%,rgba(244,114,182,0.07) 100%)",display:"flex",alignItems:"flex-start",gap:12 },
+  chatHead:   { padding:"22px 22px 20px",borderBottom:"1px solid rgba(129,140,248,0.12)",background:"linear-gradient(135deg,rgba(129,140,248,0.12) 0%,rgba(244,114,182,0.07) 100%)",display:"flex",alignItems:"flex-start",gap:12 },
 };
